@@ -208,3 +208,215 @@ export interface ValidationIssue {
   message: string
   blockId?: string
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VIDEO PIPELINE — Google Veo 3.1
+// The photo pipeline above is unchanged. All video-specific types live below.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Top-level discriminator used by the editor store and composer to switch pipelines. */
+export type MediaType = 'photo' | 'video'
+
+// ── Veo 3.1 hard parameters ──────────────────────────────────────────────────
+// Exported as `as const` arrays so the UI can iterate them without duplicating
+// the list. Derived literal types ensure exhaustiveness in switch statements.
+
+export const VEO_DURATIONS = [4, 6, 8] as const
+export type VeoDuration = typeof VEO_DURATIONS[number]
+
+export const VEO_ASPECT_RATIOS = ['16:9', '9:16'] as const
+export type VeoAspectRatio = typeof VEO_ASPECT_RATIOS[number]
+
+/** Veo 3.1 output resolution tiers. '4K' is only available on generate tier. */
+export const VEO_RESOLUTIONS = ['720p', '1080p', '4K'] as const
+export type VeoResolution = typeof VEO_RESOLUTIONS[number]
+
+/** Veo API tier — affects latency, quality, and cost. */
+export const VEO_TIERS = ['generate', 'fast', 'lite'] as const
+export type VeoTier = typeof VEO_TIERS[number]
+
+export const VEO_CAMERA_MOVEMENTS = [
+  'static', 'pan', 'tilt', 'dolly', 'truck', 'pedestal',
+  'zoom', 'crane', 'aerial', 'handheld', 'whip', 'arc'
+] as const
+export type VeoCameraMovement = typeof VEO_CAMERA_MOVEMENTS[number]
+
+// ── Reference images (Ingredients to Video) ──────────────────────────────────
+// Veo 3.1 accepts up to 3 reference images; each must declare its role so the
+// composer can emit the correct framing sentence for the model.
+
+export type ReferenceRole = 'model' | 'garment' | 'location'
+
+export interface ReferenceImageDeclaration {
+  role: ReferenceRole
+  /** Human-readable description of what the reference provides, e.g. "the woman in the reference image". */
+  description: string
+  description_ru?: string
+}
+
+// ── Audio sub-types ───────────────────────────────────────────────────────────
+// Three sub-types matching Veo's prompt syntax: dialogue, SFX, ambient.
+
+export interface AudioDialogue {
+  /** Optional id — present when dialogue is preset/reusable; absent for one-off per-clip lines. */
+  id?: string
+  /** Who is speaking — "the model", "voiceover", "off-screen friend", etc. */
+  speaker: string
+  speaker_ru?: string
+  /** Verbatim quoted line injected as spoken dialogue. Keep ≤ 20 words per Veo guidance. */
+  line: string
+  line_ru?: string
+}
+
+export interface AudioSFX {
+  id: string                  // e.g. 'fabric_rustle', 'footsteps_wood'
+  label: string
+  label_ru?: string
+  /** Text injected after the "SFX:" prefix in the composer output. */
+  prose: string
+}
+
+export interface AudioAmbient {
+  id: string
+  label: string
+  label_ru?: string
+  /** Text injected after the "Ambient noise:" prefix in the composer output. */
+  prose: string
+}
+
+// ── Video block interfaces ────────────────────────────────────────────────────
+// Mirrors the photo Block discriminated union. Uses `kind` (not `type`) as the
+// discriminant so there is zero structural collision with the photo Block union.
+
+export interface VideoBaseBlock {
+  kind: 'VIDEO_BASE'
+  id: string
+  name: string
+  name_ru?: string
+  description?: string
+  description_ru?: string
+  /** Maps to the three photo-pipeline generation modes for UX consistency. */
+  variant: 'catalog' | 'lifestyle' | 'ugc'
+  /** Preset Veo hard-parameter defaults — can be overridden per VideoRecipe. */
+  defaultDuration: VeoDuration
+  defaultAspectRatio: VeoAspectRatio
+  defaultResolution: VeoResolution
+  defaultTier: VeoTier
+  /** User-fillable parameters, same Slot union as photo blocks. */
+  slots: Slot[]
+  prose_template?: string
+  /** Instructs the composer how to frame the reference-image role declarations. */
+  prose_reference_rule?: string
+  /** Opening sentence describing the subject before motion/camera details are added. */
+  prose_subject_intro?: string
+}
+
+export interface MotionBlock {
+  kind: 'MOTION'
+  id: string                  // e.g. 'M1', 'M2'
+  name: string
+  name_ru?: string
+  /** True if the clip is designed to loop seamlessly (e.g. for PDP tile autoplay). */
+  loopable?: boolean
+  prose_template?: string
+  /** Optional tweakable params, e.g. a "speed" slider for slow-motion variants. */
+  slots?: Slot[]
+}
+
+export interface CameraMoveBlock {
+  kind: 'CAMERA_MOVE'
+  id: string                  // e.g. 'CM1', 'CM2'
+  /** Human-readable name, e.g. "Slow dolly in", "Handheld walk". */
+  name: string
+  name_ru?: string
+  /** The exact Veo camera-movement keyword the composer emits. */
+  veo_movement: VeoCameraMovement
+  prose_template?: string
+  slots?: Slot[]
+}
+
+export interface GradeVideoBlock {
+  // Kept separate from the photo GRADE block so video grades can describe
+  // motion-aware lighting evolution (e.g. "golden hour shifts to dusk over the clip").
+  kind: 'GRADE_VIDEO'
+  id: string
+  name: string
+  name_ru?: string
+  prose_template?: string
+  slots?: Slot[]
+}
+
+export interface AudioPresetBlock {
+  kind: 'AUDIO_PRESET'
+  id: string
+  /** Preset name shown in the picker, e.g. "Café murmur + fabric rustle". */
+  name: string
+  name_ru?: string
+  ambient?: AudioAmbient
+  sfx: AudioSFX[]
+  /** Hint shown in the UI when the user fills in per-clip dialogue. */
+  dialogue_hint?: string
+  dialogue_hint_ru?: string
+}
+
+/** Discriminated union of all video-pipeline block types. */
+export type VideoBlock =
+  | VideoBaseBlock
+  | MotionBlock
+  | CameraMoveBlock
+  | GradeVideoBlock
+  | AudioPresetBlock
+
+// ── Video recipe ──────────────────────────────────────────────────────────────
+// Mirrors the photo Recipe shape. Block references are flat id strings (not
+// RecipeBlockRef objects) because video blocks don't share the photo tag/compat
+// system — they use simpler direct selection.
+
+export interface VideoRecipe {
+  id: string
+  name: string
+  name_ru?: string
+  description?: string
+  description_ru?: string
+  baseId: string              // VideoBaseBlock id
+  motionId?: string           // MotionBlock id
+  cameraMoveId?: string       // CameraMoveBlock id
+  gradeId?: string            // GradeVideoBlock id
+  audioPresetId?: string      // AudioPresetBlock id
+  // Hard parameter overrides — fall back to VideoBaseBlock defaults if absent
+  duration?: VeoDuration
+  aspectRatio?: VeoAspectRatio
+  resolution?: VeoResolution
+  tier?: VeoTier
+  /**
+   * Absent = text-only generation. Present = "Ingredients to Video" mode
+   * (Veo 3.1 supports up to 3 reference images, ≥1 required when in this mode).
+   */
+  references?: ReferenceImageDeclaration[]
+  /** Reuse the existing SlotValues alias for per-recipe slot overrides. */
+  slotValues?: SlotValues
+  /** Per-recipe dialogue; not part of the audio preset because it's clip-specific. */
+  dialogue?: AudioDialogue
+  /** Unwanted elements expressed positively (Veo rejects "no X" phrasing). */
+  negativePrompt?: string
+}
+
+// ── Video editor slice (type-only) ────────────────────────────────────────────
+// Future Zustand slice shape. Defined here so the composer and store can import
+// a single source of truth. Do NOT add this to the store yet — that is Task B.
+
+export interface VideoEditorSlice {
+  videoBaseId: string | null
+  videoMotionId: string | null
+  videoCameraMoveId: string | null
+  videoGradeId: string | null
+  videoAudioPresetId: string | null
+  videoDuration: VeoDuration
+  videoAspectRatio: VeoAspectRatio
+  videoResolution: VeoResolution
+  videoTier: VeoTier
+  videoReferences: ReferenceImageDeclaration[]
+  videoDialogue: AudioDialogue | null
+  videoNegativePrompt: string
+  videoSlotValues: SlotValues
+}
