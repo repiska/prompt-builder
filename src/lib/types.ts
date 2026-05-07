@@ -309,6 +309,8 @@ export interface VideoBaseBlock {
   prose_reference_rule?: string
   /** Opening sentence describing the subject before motion/camera details are added. */
   prose_subject_intro?: string
+  /** Optional scene-context sentence used in the deterministic prose path (5-section order, Context slot). */
+  prose_context?: string
 }
 
 export interface MotionBlock {
