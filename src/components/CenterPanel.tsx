@@ -2,7 +2,7 @@ import { useEditor } from '../store/editor'
 import { findBlock } from '../data/blocks'
 import { BlockCard } from './BlockCard'
 import type { BlockType } from '../lib/types'
-import { t } from '../lib/i18n'
+import { t, loc } from '../lib/i18n'
 
 export function CenterPanel() {
   const lang = useEditor((s) => s.lang)
@@ -66,7 +66,7 @@ function BaseCard() {
       <div className="flex items-center justify-between mb-2">
         <div>
           <div className="label">{t(lang, 'block.globalBase')}</div>
-          <div className="font-medium text-ink-100">{baseBlock.name}</div>
+          <div className="font-medium text-ink-100">{loc(baseBlock, lang, 'name')}</div>
         </div>
       </div>
       <details>

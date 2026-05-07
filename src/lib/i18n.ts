@@ -139,3 +139,14 @@ export function t(lang: Lang, key: string, params?: Record<string, string>): str
   }
   return str
 }
+
+/** Pick the localized variant of a record's text field — falls back to the EN field. */
+export function loc(obj: object, lang: Lang, field: string): string {
+  const o = obj as Record<string, unknown>
+  if (lang === 'ru') {
+    const ru = o[`${field}_ru`]
+    if (typeof ru === 'string' && ru.length > 0) return ru
+  }
+  const en = o[field]
+  return typeof en === 'string' ? en : ''
+}

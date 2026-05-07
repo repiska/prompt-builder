@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { useEditor } from '../store/editor'
 import { recipesForUseCase } from '../data/recipes'
 import type { GenerationType, ValidationIssue } from '../lib/types'
-import { t } from '../lib/i18n'
+import { t, loc } from '../lib/i18n'
 
 const GEN_OPTIONS: { value: GenerationType; labelKey: string; descKey: string }[] = [
   { value: 'catalog', labelKey: 'gen.catalog', descKey: 'gen.catalog.desc' },
@@ -106,7 +106,7 @@ export function LeftPanel({ issues }: Props) {
           <optgroup label={t(lang, 'recipe.builtin')}>
             {(useCase ? recipes : allBaseRecipes).map((r) => (
               <option key={r.id} value={r.id}>
-                {r.name}
+                {loc(r, lang, 'name')}
               </option>
             ))}
           </optgroup>
@@ -114,7 +114,7 @@ export function LeftPanel({ issues }: Props) {
             <optgroup label={t(lang, 'recipe.custom')}>
               {customForBase.map((r) => (
                 <option key={r.id} value={r.id}>
-                  {r.name}
+                  {loc(r, lang, 'name')}
                 </option>
               ))}
             </optgroup>
@@ -214,12 +214,12 @@ export function LeftPanel({ issues }: Props) {
                   key={r.id}
                   className="flex items-center justify-between gap-2 text-xs bg-ink-700 rounded px-2 py-1"
                 >
-                  <span className="truncate">{r.name}</span>
+                  <span className="truncate">{loc(r, lang, 'name')}</span>
                   <button
                     type="button"
                     className="text-ink-400 hover:text-bad"
                     onClick={() => {
-                      if (confirm(t(lang, 'recipe.confirmDelete', { name: r.name }))) deleteCustom(r.id)
+                      if (confirm(t(lang, 'recipe.confirmDelete', { name: loc(r, lang, 'name') }))) deleteCustom(r.id)
                     }}
                   >
                     {t(lang, 'recipe.delete')}

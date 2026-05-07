@@ -4,7 +4,7 @@ import { useEditor } from '../store/editor'
 import { defaultSlotValues } from '../lib/render'
 import type { Block, BlockType, RecipeBlockRef } from '../lib/types'
 import { SlotControl } from './controls/SlotControl'
-import { t } from '../lib/i18n'
+import { t, loc } from '../lib/i18n'
 
 interface Props {
   type: BlockType
@@ -52,7 +52,7 @@ export function BlockCard({ type, ref: blockRef, required }: Props) {
           </option>
           {candidates.map((b) => (
             <option key={b.id} value={b.id}>
-              {b.name}
+              {loc(b, lang, 'name')}
             </option>
           ))}
         </select>
@@ -69,7 +69,7 @@ export function BlockCard({ type, ref: blockRef, required }: Props) {
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="min-w-0">
           <div className="label">{typeLabel}</div>
-          <div className="font-medium text-ink-100 truncate">{block.name}</div>
+          <div className="font-medium text-ink-100 truncate">{loc(block, lang, 'name')}</div>
         </div>
         <div className="flex items-center gap-1">
           {!required && (
@@ -93,14 +93,14 @@ export function BlockCard({ type, ref: blockRef, required }: Props) {
         >
           {candidates.map((b) => (
             <option key={b.id} value={b.id}>
-              {b.name}
+              {loc(b, lang, 'name')}
             </option>
           ))}
         </select>
       )}
 
-      {block.description && (
-        <p className="help-text mb-3 -mt-1">{block.description}</p>
+      {(loc(block, lang, 'description') || block.description) && (
+        <p className="help-text mb-3 -mt-1">{loc(block, lang, 'description') || block.description}</p>
       )}
 
       {block.slots.filter((s) => s.type !== 'hidden').length > 0 && mode === 'block' && (

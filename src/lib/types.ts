@@ -24,12 +24,15 @@ export type SlotType =
 export interface EnumOption {
   value: string
   label: string
+  label_ru?: string
 }
 
 export interface BaseSlot {
   id: string
   label?: string
+  label_ru?: string
   help?: string
+  help_ru?: string
   default: unknown
   /** When set, the slot writes a derived string into this template field instead of (or in addition to) its own id. */
   computed_field?: string
@@ -72,7 +75,7 @@ export interface ColorPickerSlot extends BaseSlot {
   type: 'color_picker'
   default: string
   range_constraint?: ColorRangeConstraint
-  presets?: { value: string; label: string }[]
+  presets?: { value: string; label: string; label_ru?: string }[]
 }
 
 export interface ApertureSlot extends BaseSlot {
@@ -151,6 +154,7 @@ export interface Block {
   name: string
   name_ru?: string
   description?: string
+  description_ru?: string
   /** Whether this block is run at pass-2 (for GRADE). */
   stage?: 'pass1' | 'pass2'
   template: string
@@ -170,7 +174,9 @@ export interface RecipeBlockRef {
 export interface Recipe {
   id: string
   name: string
+  name_ru?: string
   description?: string
+  description_ru?: string
   use_case?: 'UC1' | 'UC2' | 'UC3' | 'UC4'
   base: string
   blocks: RecipeBlockRef[]

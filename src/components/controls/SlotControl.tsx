@@ -1,4 +1,6 @@
 import type { Slot } from '../../lib/types'
+import { useEditor } from '../../store/editor'
+import { loc } from '../../lib/i18n'
 
 interface Props {
   slot: Slot
@@ -7,13 +9,17 @@ interface Props {
 }
 
 export function SlotControl({ slot, value, onChange }: Props) {
+  const lang = useEditor((s) => s.lang)
   if (slot.type === 'hidden') return null
+
+  const label = loc(slot, lang, 'label') || slot.id
+  const help = loc(slot, lang, 'help')
 
   return (
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2">
         <label className="field-label flex items-center gap-2" htmlFor={slot.id}>
-          {slot.label ?? slot.id}
+          {label}
         </label>
         <ValueBadge slot={slot} value={value} />
       </div>
@@ -27,7 +33,7 @@ export function SlotControl({ slot, value, onChange }: Props) {
         >
           {slot.options.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {loc(opt, lang, 'label')}
             </option>
           ))}
         </select>
@@ -64,7 +70,7 @@ export function SlotControl({ slot, value, onChange }: Props) {
           value={String(value ?? slot.default)}
           onChange={onChange}
           presets={slot.presets}
-          help={slot.help}
+          lang={lang}
         />
       )}
 
@@ -122,12 +128,13 @@ export function SlotControl({ slot, value, onChange }: Props) {
       {slot.type === 'multiselect' && (
         <MultiselectControl
           options={slot.options}
+          lang={lang}
           value={Array.isArray(value) ? (value as string[]) : (slot.default as string[])}
           onChange={(v) => onChange(v)}
         />
       )}
 
-      {slot.help && <p className="help-text">{slot.help}</p>}
+      {help && <p className="help-text">{help}</p>}
     </div>
   )
 }
@@ -280,10 +287,10 @@ function ColorPickerControl(props: {
   id: string
   value: string
   onChange: (v: string) => void
-  presets?: { value: string; label: string }[]
-  help?: string
+  presets?: { value: string; label: string; label_ru?: string }[]
+  lang: 'en' | 'ru'
 }) {
-  const { id, value, onChange, presets } = props
+  const { id, value, onChange, presets, lang } = props
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
@@ -320,7 +327,7 @@ function ColorPickerControl(props: {
                 className="inline-block w-3 h-3 rounded border border-ink-500"
                 style={{ background: p.value }}
               />
-              {p.label}
+              {loc(p, lang, 'label')}
             </button>
           ))}
         </div>
@@ -330,11 +337,12 @@ function ColorPickerControl(props: {
 }
 
 function MultiselectControl(props: {
-  options: { value: string; label: string }[]
+  options: { value: string; label: string; label_ru?: string }[]
+  lang: 'en' | 'ru'
   value: string[]
   onChange: (v: string[]) => void
 }) {
-  const { options, value, onChange } = props
+  const { options, value, onChange, lang } = props
   const toggle = (v: string) => {
     if (value.includes(v)) onChange(value.filter((x) => x !== v))
     else onChange([...value, v])
@@ -357,7 +365,7 @@ function MultiselectControl(props: {
               onChange={() => toggle(opt.value)}
               className="accent-accent-500"
             />
-            {opt.label}
+            {loc(opt, lang, 'label')}
           </label>
         )
       })}

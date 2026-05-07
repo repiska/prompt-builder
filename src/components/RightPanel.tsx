@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useEditor } from '../store/editor'
 import type { ComposedPrompt } from '../lib/composer'
 import type { ValidationIssue } from '../lib/types'
-import { t } from '../lib/i18n'
+import { t, loc } from '../lib/i18n'
 
 interface Props {
   composed: ComposedPrompt
@@ -38,7 +38,7 @@ export function RightPanel({ composed, issues }: Props) {
         <div>
           <div className="label">{t(lang, 'prompt.title')}</div>
           <div className="text-sm text-ink-200 truncate">
-            {recipe.name}
+            {loc(recipe, lang, 'name')}
             {recipe.custom && <span className="ml-2 text-xs text-warn">{t(lang, 'recipe.modified')}</span>}
           </div>
         </div>
