@@ -279,7 +279,7 @@ function resolveBlockText(block: { prose_template?: string; name: string }, slot
 const VEO_DEFAULT_NEGATIVE =
   'morphing face, melting eyes, extra fingers, double heads, disjointed limbs, color bleeding, warped text, drifting camera, motion blur artifacts, oversaturated, plastic skin'
 
-const REFERENCE_ORDINALS = ['first', 'second', 'third'] as const
+const VALID_ASPECT_RATIOS: readonly VeoAspectRatio[] = ['16:9', '9:16']
 
 // ─────────────────────────────────────────────────────────────────────────────
 // composeVideoPrompt
@@ -293,7 +293,7 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
     grade,
     audioPreset,
     duration,
-    aspectRatio,
+    aspectRatio: inputAspectRatio,
     resolution,
     tier,
     references,
@@ -312,20 +312,52 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
     )
   }
 
-  // ── Tier compatibility checks ──────────────────────────────────────────────
+  // ── Rule 6 — Aspect-ratio enum guard ──────────────────────────────────────
+  let aspectRatio: VeoAspectRatio
+  if (VALID_ASPECT_RATIOS.includes(inputAspectRatio)) {
+    aspectRatio = inputAspectRatio as VeoAspectRatio
+  } else {
+    aspectRatio = '9:16'
+    warnings.push('Unsupported aspect ratio coerced to 9:16.')
+  }
+
+  // ── Rule 2 — Coerce tier: disable Lite when references are present ─────────
+  let effectiveTier: VeoTier = tier
   if (tier === 'lite' && effectiveRefs.length > 0) {
-    warnings.push(
-      "Veo 3.1 Lite does not support reference images; use 'generate' or 'fast' for Ingredients-to-Video.",
-    )
+    effectiveTier = 'fast'
+    warnings.push('Tier auto-upgraded to Fast — Veo 3.1 Lite does not support reference images.')
   }
-  if (resolution === '4K' && tier !== 'generate') {
-    warnings.push("4K is only available on the 'generate' tier.")
+
+  // ── Rule 3 — Coerce resolution: disable 4K when not on generate tier ──────
+  let effectiveResolution: VeoResolution = resolution
+  if (resolution === '4K' && effectiveTier !== 'generate') {
+    effectiveResolution = '1080p'
+    warnings.push('Resolution auto-downgraded to 1080p — 4K requires Generate tier.')
   }
-  if (resolution !== '720p' && duration !== 8) {
-    warnings.push('1080p and 4K require duration of 8 seconds on Veo 3.1.')
-  }
+
+  // ── Rule 1 — Coerce duration: force 8s when references are present ────────
+  let effectiveDuration: VeoDuration = duration
+  let durationCoercedByRule1 = false
   if (effectiveRefs.length > 0 && duration !== 8) {
-    warnings.push('Reference images require duration of 8 seconds on Veo 3.1.')
+    effectiveDuration = 8
+    durationCoercedByRule1 = true
+    warnings.push('Duration auto-set to 8s — Veo 3.1 reference images require 8s output.')
+  }
+
+  // ── Rule 4 — Coerce duration: force 8s for 1080p/4K (if not already set) ──
+  if (effectiveResolution !== '720p' && effectiveDuration !== 8 && !durationCoercedByRule1) {
+    effectiveDuration = 8
+    warnings.push('Duration auto-set to 8s — 1080p/4K require 8s on Veo 3.1.')
+  }
+
+  // ── Rule 5 — Validate reference descriptions ──────────────────────────────
+  for (let i = 0; i < effectiveRefs.length; i++) {
+    const ref = effectiveRefs[i]
+    if (!ref.description || !ref.description.trim()) {
+      warnings.push(
+        `Reference image #${i + 1} (role: ${ref.role}) has no description — Veo will infer the subject which reduces consistency.`,
+      )
+    }
   }
 
   // ── Dialogue word count guard ──────────────────────────────────────────────
@@ -339,15 +371,26 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
   const sentences: string[] = []
 
   // 0. Reference role declarations (prepended before the 5-section prose)
+  // Only include refs that have non-empty descriptions in the prose framing sentence.
   if (effectiveRefs.length > 0) {
-    const roleList = effectiveRefs
-      .map((r, i) => r.description || `the subject from the ${REFERENCE_ORDINALS[i]} reference image`)
-      .join(', ')
-    sentences.push(
-      ensurePeriod(
-        `Use the provided reference images: ${roleList}. Preserve their identity and appearance throughout the clip`,
-      ),
-    )
+    const descList = effectiveRefs
+      .filter((r) => r.description && r.description.trim())
+      .map((r) => r.description)
+    if (descList.length > 0) {
+      const roleList = descList.join(', ')
+      sentences.push(
+        ensurePeriod(
+          `Use the provided reference images: ${roleList}. Preserve their identity and appearance throughout the clip`,
+        ),
+      )
+    } else {
+      // All refs had empty descriptions — still mention that references are present
+      sentences.push(
+        ensurePeriod(
+          'Use the provided reference images. Preserve their identity and appearance throughout the clip',
+        ),
+      )
+    }
   }
 
   // ── Determine prose body strategy ─────────────────────────────────────────
@@ -453,10 +496,10 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
     prompt,
     negativePrompt: finalNegative,
     apiParams: {
-      durationSeconds: duration,
+      durationSeconds: effectiveDuration,
       aspectRatio,
-      resolution,
-      tier,
+      resolution: effectiveResolution,
+      tier: effectiveTier,
       referenceImagesCount: effectiveRefs.length,
     },
     warnings,
