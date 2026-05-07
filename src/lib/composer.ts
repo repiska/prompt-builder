@@ -16,6 +16,9 @@ import type {
   VeoAspectRatio,
   VeoResolution,
   VeoTier,
+  VideoProject,
+  ProjectClipRole,
+  VoiceoverScript,
 } from './types'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -503,5 +506,240 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
       referenceImagesCount: effectiveRefs.length,
     },
     warnings,
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// composeVideoProject
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ComposeProjectInput {
+  project: VideoProject
+  /** Resolved blocks per clip — caller does the lookup and passes them in.
+   *  The map key is the clip id; value is everything composeVideoPrompt would normally need
+   *  for that clip, MINUS the project-shared bits (references, identity, continuity, dialogue when silent). */
+  resolvedClips: Record<string, {
+    base: VideoBaseBlock
+    motion?: MotionBlock | null
+    cameraMove?: CameraMoveBlock | null
+    grade?: GradeVideoBlock | null
+    audioPreset?: AudioPresetBlock | null
+    duration: VeoDuration
+    aspectRatio: VeoAspectRatio
+    resolution: VeoResolution
+    tier: VeoTier
+    slotValues: SlotValues
+    negativePrompt?: string
+    /** Recipe's baseline dialogue. Used when audioStrategy is 'native_per_clip' and the clip has no dialogueOverride. */
+    dialogue?: AudioDialogue | null
+  }>
+}
+
+export interface ComposeProjectOutput {
+  /** One entry per clip, in order. */
+  clipPrompts: Array<{
+    clipId: string
+    clipRole: ProjectClipRole
+    prompt: string
+    negativePrompt: string
+    apiParams: ComposeVideoOutput['apiParams']
+    warnings: string[]
+  }>
+  /** Continuity checklist — what the user should verify before stitching. */
+  continuityChecklist: string[]
+  /** Voiceover script if project.audioStrategy === 'silent_for_voiceover_overlay'; else undefined. */
+  voiceoverScript?: VoiceoverScript
+  /** Top-level project warnings (not specific to a clip). */
+  projectWarnings: string[]
+}
+
+/** Build a continuity sentence from the lock fields. Returns empty string if all fields are empty. */
+function buildContinuitySentence(lock: VideoProject['continuityLock']): string {
+  const parts: string[] = []
+  if (lock.wardrobe) parts.push(`wardrobe — ${lock.wardrobe}`)
+  if (lock.lens) parts.push(`lens — ${lock.lens}`)
+  if (lock.grade) parts.push(`grade — ${lock.grade}`)
+  if (lock.lighting) parts.push(`lighting — ${lock.lighting}`)
+  if (lock.timeOfDay) parts.push(`time of day — ${lock.timeOfDay}`)
+  if (parts.length === 0) return ''
+  return `Continuity: ${parts.join('; ')}.`
+}
+
+export function composeVideoProject(input: ComposeProjectInput): ComposeProjectOutput {
+  const { project, resolvedClips } = input
+  const projectWarnings: string[] = []
+
+  // ── Project-level warnings ─────────────────────────────────────────────────
+  if (project.clips.length === 0) {
+    projectWarnings.push('Project has no clips.')
+  }
+  if (project.clips.length > 8) {
+    projectWarnings.push(
+      'Project has more than 8 clips — consider splitting into separate projects to avoid review fatigue.',
+    )
+  }
+  if (project.audioStrategy === 'native_per_clip' && project.clips.length > 1) {
+    projectWarnings.push(
+      "Native audio across multiple clips may produce jarring transitions per Veo 3.1 docs — consider 'silent_for_voiceover_overlay'.",
+    )
+  }
+  if (project.audioStrategy === 'silent_for_voiceover_overlay' && !project.voiceoverScript) {
+    projectWarnings.push(
+      'Voiceover-overlay strategy selected but no voiceoverScript provided.',
+    )
+  }
+  if (project.sharedReferences.length > 3) {
+    projectWarnings.push(
+      'Veo 3.1 accepts at most 3 reference images; only the first 3 will be used by every clip.',
+    )
+  }
+
+  // Detect duplicate clipRole values
+  const roleCount = new Map<string, number>()
+  for (const clip of project.clips) {
+    roleCount.set(clip.clipRole, (roleCount.get(clip.clipRole) ?? 0) + 1)
+  }
+  const warnedRoles = new Set<string>()
+  for (const clip of project.clips) {
+    const count = roleCount.get(clip.clipRole) ?? 0
+    if (count > 1 && !warnedRoles.has(clip.clipRole)) {
+      projectWarnings.push(
+        `Two or more clips share the role '${clip.clipRole}' — verify this is intentional.`,
+      )
+      warnedRoles.add(clip.clipRole)
+    }
+  }
+
+  // ── Pre-build continuity sentence (shared across all clips) ───────────────
+  const continuitySentence = buildContinuitySentence(project.continuityLock)
+
+  // ── Per-clip composition ──────────────────────────────────────────────────
+  const clipPrompts: ComposeProjectOutput['clipPrompts'] = []
+
+  for (const clip of project.clips) {
+    const resolvedClip = resolvedClips[clip.id]
+    if (!resolvedClip) {
+      // If caller omitted this clip's resolved data, emit an error entry and continue
+      clipPrompts.push({
+        clipId: clip.id,
+        clipRole: clip.clipRole,
+        prompt: `[ERROR] No resolved data for clip id "${clip.id}".`,
+        negativePrompt: '',
+        apiParams: {
+          durationSeconds: 8,
+          aspectRatio: project.defaultAspectRatio,
+          resolution: project.defaultResolution,
+          tier: project.defaultTier,
+          referenceImagesCount: 0,
+        },
+        warnings: [`Resolved data missing for clip "${clip.id}".`],
+      })
+      continue
+    }
+
+    // 1. Enrich base with identity descriptor.
+    // Mutually exclusive: inject into prose_template when it is set (spine path),
+    // otherwise inject into prose_subject_intro (deterministic 5-section path).
+    const enrichedBase: VideoBaseBlock = {
+      ...resolvedClip.base,
+      prose_subject_intro: !resolvedClip.base.prose_template && project.sharedIdentityDescriptor
+        ? `${project.sharedIdentityDescriptor} ${resolvedClip.base.prose_subject_intro ?? ''}`.trim()
+        : resolvedClip.base.prose_subject_intro,
+      prose_template: resolvedClip.base.prose_template && project.sharedIdentityDescriptor
+        ? `${project.sharedIdentityDescriptor} ${resolvedClip.base.prose_template}`
+        : resolvedClip.base.prose_template,
+    }
+
+    // 2. Inject continuity sentence.
+    // Deterministic path: append to prose_context.
+    // Spine path: append to prose_template so it survives the prose_template branch.
+    let enrichedProseContext: string | undefined = enrichedBase.prose_context
+    if (continuitySentence) {
+      enrichedProseContext = enrichedBase.prose_context
+        ? `${enrichedBase.prose_context} ${continuitySentence}`
+        : continuitySentence
+    }
+    const enrichedProseTemplate =
+      continuitySentence && enrichedBase.prose_template
+        ? `${enrichedBase.prose_template} ${continuitySentence}`
+        : enrichedBase.prose_template
+    const baseWithContinuity: VideoBaseBlock = {
+      ...enrichedBase,
+      prose_context: enrichedProseContext,
+      prose_template: enrichedProseTemplate,
+    }
+
+    // 3. Resolve dialogue for this clip
+    let effectiveDialogue: AudioDialogue | null
+    if (project.audioStrategy === 'silent_for_voiceover_overlay') {
+      effectiveDialogue = null
+    } else if (clip.dialogueOverride !== undefined) {
+      effectiveDialogue = clip.dialogueOverride ?? null
+    } else {
+      effectiveDialogue = resolvedClip.dialogue ?? null
+    }
+
+    // 4. Resolve duration
+    const effectiveDuration: VeoDuration = clip.durationOverride ?? resolvedClip.duration
+
+    // 5. Call composeVideoPrompt
+    const result = composeVideoPrompt({
+      base: baseWithContinuity,
+      motion: resolvedClip.motion ?? null,
+      cameraMove: resolvedClip.cameraMove ?? null,
+      grade: resolvedClip.grade ?? null,
+      audioPreset: resolvedClip.audioPreset ?? null,
+      duration: effectiveDuration,
+      aspectRatio: resolvedClip.aspectRatio,
+      resolution: resolvedClip.resolution,
+      tier: resolvedClip.tier,
+      references: project.sharedReferences,
+      dialogue: effectiveDialogue,
+      negativePrompt: resolvedClip.negativePrompt,
+      slotValues: resolvedClip.slotValues,
+    })
+
+    clipPrompts.push({
+      clipId: clip.id,
+      clipRole: clip.clipRole,
+      prompt: result.prompt,
+      negativePrompt: result.negativePrompt,
+      apiParams: result.apiParams,
+      warnings: result.warnings,
+    })
+  }
+
+  // ── Continuity checklist ───────────────────────────────────────────────────
+  const continuityChecklist: string[] = []
+  continuityChecklist.push('Subject identity matches across all clips.')
+  if (project.sharedReferences.length > 0) {
+    continuityChecklist.push(
+      `All clips referenced the same ${project.sharedReferences.length} images.`,
+    )
+  }
+  if (project.sharedSeed !== undefined) {
+    continuityChecklist.push(`Seed ${project.sharedSeed} used for all generations.`)
+  }
+  const lock = project.continuityLock
+  if (lock.wardrobe) continuityChecklist.push(`Wardrobe consistent: ${lock.wardrobe}`)
+  if (lock.lens) continuityChecklist.push(`Lens consistent: ${lock.lens}`)
+  if (lock.grade) continuityChecklist.push(`Grade consistent: ${lock.grade}`)
+  if (lock.lighting) continuityChecklist.push(`Lighting consistent: ${lock.lighting}`)
+  if (lock.timeOfDay) continuityChecklist.push(`Time of day consistent: ${lock.timeOfDay}`)
+  if (project.audioStrategy === 'silent_for_voiceover_overlay') {
+    continuityChecklist.push('Voiceover overlaid in CapCut/ElevenLabs after generation.')
+  }
+
+  // ── Voiceover script ───────────────────────────────────────────────────────
+  const voiceoverScript =
+    project.audioStrategy === 'silent_for_voiceover_overlay'
+      ? project.voiceoverScript
+      : undefined
+
+  return {
+    clipPrompts,
+    continuityChecklist,
+    voiceoverScript,
+    projectWarnings,
   }
 }

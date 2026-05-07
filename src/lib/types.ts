@@ -422,3 +422,103 @@ export interface VideoEditorSlice {
   videoNegativePrompt: string
   videoSlotValues: SlotValues
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VIDEO PROJECT — multi-clip stitched social ad (Block 3)
+// Each project composes multiple Veo 3.1 clips sharing identity, references,
+// and a continuity lock so the output can be stitched into a 15–60s Reel/TikTok.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Narrative beat role each clip plays inside the stitched output. */
+export const PROJECT_CLIP_ROLES = ['hook', 'demo', 'reaction', 'cta', 'b_roll'] as const
+export type ProjectClipRole = typeof PROJECT_CLIP_ROLES[number]
+
+/** How audio is handled at the project level. */
+export const PROJECT_AUDIO_STRATEGIES = ['native_per_clip', 'silent_for_voiceover_overlay'] as const
+export type ProjectAudioStrategy = typeof PROJECT_AUDIO_STRATEGIES[number]
+
+// ── ElevenLabs voiceover ──────────────────────────────────────────────────────
+
+/** Known ElevenLabs Russian-language voice presets. */
+export const ELEVENLABS_RU_VOICES = ['ivan', 'mariia', 'ekaterina', 'sergey', 'marina'] as const
+export type ElevenLabsRuVoice = typeof ELEVENLABS_RU_VOICES[number]
+
+export interface VoiceoverScript {
+  /** ISO 639-1 language code; only 'en' / 'ru' are validated by the composer for now. */
+  lang: 'en' | 'ru'
+  /** The text the user will paste into ElevenLabs / equivalent TTS. */
+  text: string
+  /** Optional preset voice id; for RU this is a known ElevenLabs voice. */
+  suggestedVoice?: ElevenLabsRuVoice | 'default'
+}
+
+// ── Continuity lock ───────────────────────────────────────────────────────────
+
+/** Fields injected verbatim into every clip prompt to keep the stitched cut coherent. */
+export interface ProjectContinuityLock {
+  /** Wardrobe descriptor injected into every clip prompt verbatim. */
+  wardrobe?: string
+  wardrobe_ru?: string
+  /** Lens / focal-length descriptor (e.g. "35mm equivalent"). */
+  lens?: string
+  lens_ru?: string
+  /** Color-grade descriptor (e.g. "warm filmic, soft contrast"). */
+  grade?: string
+  grade_ru?: string
+  /** Lighting descriptor (e.g. "soft window light, no studio fixtures"). */
+  lighting?: string
+  lighting_ru?: string
+  /** Time-of-day (e.g. "late afternoon golden hour"). */
+  timeOfDay?: string
+  timeOfDay_ru?: string
+}
+
+// ── Project clip ──────────────────────────────────────────────────────────────
+
+/** One clip slot inside a VideoProject — recipe reference + role + per-clip overrides. */
+export interface VideoProjectClip {
+  /** Stable id for the clip within the project (e.g. UUID or "c1", "c2"). */
+  id: string
+  /** Recipe id from VIDEO_RECIPES or UGC_RECIPES. */
+  recipeId: string
+  /** Beat role this clip plays in the stitched output. */
+  clipRole: ProjectClipRole
+  /** Override the recipe's duration (still subject to Block 1 hard rules). */
+  durationOverride?: VeoDuration
+  /** Override the recipe's dialogue (or null to suppress dialogue for this clip). */
+  dialogueOverride?: AudioDialogue | null
+  /** Optional one-off note for the user / future context. */
+  note?: string
+  note_ru?: string
+}
+
+// ── Project ───────────────────────────────────────────────────────────────────
+
+export interface VideoProject {
+  id: string
+  name: string
+  name_ru?: string
+  description?: string
+  description_ru?: string
+  /** References inherited by every clip in this project (Veo Ingredients-to-Video).
+   *  Up to 3 entries. Empty = text-only mode. */
+  sharedReferences: ReferenceImageDeclaration[]
+  /** Identity descriptor sentence repeated verbatim in every clip's prompt to anchor the subject.
+   *  E.g. "The same female protagonist, early 30s, shoulder-length black hair, beige trench coat." */
+  sharedIdentityDescriptor?: string
+  sharedIdentityDescriptor_ru?: string
+  /** Optional fixed seed shared across all clips (Veo accepts a seed param). */
+  sharedSeed?: number
+  /** Continuity-lock fields injected into every clip prompt. */
+  continuityLock: ProjectContinuityLock
+  /** How audio is handled across clips. */
+  audioStrategy: ProjectAudioStrategy
+  /** Optional voiceover script — used when audioStrategy is silent_for_voiceover_overlay. */
+  voiceoverScript?: VoiceoverScript
+  /** Ordered list of clips that make up the project. */
+  clips: VideoProjectClip[]
+  /** Hard parameter defaults for new clips added to this project. */
+  defaultAspectRatio: VeoAspectRatio
+  defaultResolution: VeoResolution
+  defaultTier: VeoTier
+}
