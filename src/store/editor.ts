@@ -10,6 +10,7 @@ import {
   BASE_FOR_GEN,
   REQUIRED_BLOCKS_BY_GEN,
 } from '../lib/types'
+import type { Lang } from '../lib/i18n'
 
 type Mode = 'recipe' | 'block' | 'expert'
 
@@ -23,6 +24,7 @@ interface PersistedState {
   recipe: Recipe
   mode: Mode
   expertOpen: Record<string, boolean>
+  lang: Lang
 }
 
 interface EditorState extends PersistedState {
@@ -31,6 +33,7 @@ interface EditorState extends PersistedState {
   setUseCase: (u: string | undefined) => void
   setRecipeId: (id: string) => void
   setMode: (m: Mode) => void
+  setLang: (l: Lang) => void
   toggleExpert: (key: string) => void
   setBlockId: (type: BlockType, id: string) => void
   removeBlock: (type: BlockType) => void
@@ -118,8 +121,8 @@ function loadCustomRecipes(): Recipe[] {
 }
 
 function stripCustom(state: EditorState): PersistedState {
-  const { generation, useCase, recipeId, recipe, mode, expertOpen } = state
-  return { generation, useCase, recipeId, recipe, mode, expertOpen }
+  const { generation, useCase, recipeId, recipe, mode, expertOpen, lang } = state
+  return { generation, useCase, recipeId, recipe, mode, expertOpen, lang }
 }
 
 function persistState(s: PersistedState) {
@@ -142,6 +145,14 @@ const persisted = loadPersistedState()
 const initialGeneration: GenerationType = persisted?.generation ?? 'lifestyle'
 const initialRecipe = persisted?.recipe ?? freshRecipeFor(initialGeneration, 'LIF_EVE_RESTAURANT')
 
+function detectInitialLang(): Lang {
+  if (typeof navigator !== 'undefined') {
+    const code = (navigator.language || 'en').toLowerCase()
+    if (code.startsWith('ru') || code.startsWith('uk') || code.startsWith('be') || code.startsWith('kk')) return 'ru'
+  }
+  return 'en'
+}
+
 const initial: PersistedState = persisted ?? {
   generation: initialGeneration,
   useCase: 'UC1',
@@ -149,6 +160,10 @@ const initial: PersistedState = persisted ?? {
   recipe: initialRecipe,
   mode: 'recipe',
   expertOpen: {},
+  lang: detectInitialLang(),
+}
+if (!persisted?.lang) {
+  initial.lang = persisted?.lang ?? detectInitialLang()
 }
 
 export const useEditor = create<EditorState>((set, get) => ({
@@ -172,7 +187,12 @@ export const useEditor = create<EditorState>((set, get) => ({
 
   setUseCase: (u) => {
     set({ useCase: u })
-    persistState({ ...get() })
+    persistState(stripCustom(get()))
+  },
+
+  setLang: (l) => {
+    set({ lang: l })
+    persistState(stripCustom(get()))
   },
 
   setRecipeId: (id) => {
@@ -307,6 +327,7 @@ export const useEditor = create<EditorState>((set, get) => ({
       recipe,
       mode: 'recipe',
       expertOpen: {},
+      lang: get().lang,
     }
     set({ ...next })
     persistState(next)

@@ -5,12 +5,14 @@ import { CenterPanel } from './components/CenterPanel'
 import { RightPanel } from './components/RightPanel'
 import { composePrompt } from './lib/composer'
 import { validate } from './lib/validate'
+import { t, type Lang } from './lib/i18n'
 
 type Tab = 'setup' | 'blocks' | 'prompt'
 
 function App() {
   const recipe = useEditor((s) => s.recipe)
   const generation = useEditor((s) => s.generation)
+  const lang = useEditor((s) => s.lang)
 
   const composed = useMemo(() => composePrompt(recipe), [recipe])
   const issues = useMemo(() => validate({ generation, recipe }), [generation, recipe])
@@ -35,20 +37,20 @@ function App() {
       <div className="lg:hidden flex flex-col flex-1 min-h-0">
         <nav className="flex border-b border-ink-700 bg-ink-800">
           {([
-            { id: 'setup' as Tab, label: 'Setup' },
-            { id: 'blocks' as Tab, label: 'Blocks' },
-            { id: 'prompt' as Tab, label: 'Prompt' },
-          ]).map((t) => (
+            { id: 'setup' as Tab, key: 'tab.setup' },
+            { id: 'blocks' as Tab, key: 'tab.blocks' },
+            { id: 'prompt' as Tab, key: 'tab.prompt' },
+          ]).map((tt) => (
             <button
-              key={t.id}
+              key={tt.id}
               type="button"
-              onClick={() => setTab(t.id)}
+              onClick={() => setTab(tt.id)}
               className={
                 'flex-1 py-3 text-sm font-medium border-b-2 transition-colors ' +
-                (tab === t.id ? 'border-accent-500 text-white' : 'border-transparent text-ink-300')
+                (tab === tt.id ? 'border-accent-500 text-white' : 'border-transparent text-ink-300')
               }
             >
-              {t.label}
+              {t(lang, tt.key)}
             </button>
           ))}
         </nav>
@@ -63,20 +65,50 @@ function App() {
 }
 
 function Header() {
+  const lang = useEditor((s) => s.lang)
+  const setLang = useEditor((s) => s.setLang)
   return (
     <header className="border-b border-ink-700 bg-ink-800/80 backdrop-blur sticky top-0 z-10">
       <div className="px-5 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <Logo />
           <div className="min-w-0">
-            <h1 className="text-sm font-semibold text-ink-100 leading-tight">AI Photo Prompt Builder</h1>
-            <p className="text-[11px] text-ink-400 truncate">
-              Visual editor for catalog · lifestyle · UGC prompts — v3.0 architecture
-            </p>
+            <h1 className="text-sm font-semibold text-ink-100 leading-tight">{t(lang, 'app.title')}</h1>
+            <p className="text-[11px] text-ink-400 truncate">{t(lang, 'app.subtitle')}</p>
           </div>
         </div>
+        <LangSwitcher lang={lang} onChange={setLang} />
       </div>
     </header>
+  )
+}
+
+function LangSwitcher({ lang, onChange }: { lang: Lang; onChange: (l: Lang) => void }) {
+  return (
+    <div
+      className="flex p-0.5 bg-ink-700 rounded-md text-xs"
+      role="tablist"
+      aria-label={t(lang, 'header.lang')}
+    >
+      {(['en', 'ru'] as const).map((code) => {
+        const active = lang === code
+        return (
+          <button
+            key={code}
+            type="button"
+            onClick={() => onChange(code)}
+            className={
+              'px-2.5 py-1 rounded font-medium uppercase transition-colors ' +
+              (active ? 'bg-accent-500 text-white' : 'text-ink-300 hover:text-white')
+            }
+            aria-selected={active}
+            role="tab"
+          >
+            {code}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 

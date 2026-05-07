@@ -2,8 +2,10 @@ import { useEditor } from '../store/editor'
 import { findBlock } from '../data/blocks'
 import { BlockCard } from './BlockCard'
 import type { BlockType } from '../lib/types'
+import { t } from '../lib/i18n'
 
 export function CenterPanel() {
+  const lang = useEditor((s) => s.lang)
   const recipe = useEditor((s) => s.recipe)
   const generation = useEditor((s) => s.generation)
   const addBlock = useEditor((s) => s.addBlock)
@@ -41,7 +43,7 @@ export function CenterPanel() {
           }}
           className="btn-secondary w-full text-xs"
         >
-          + Add Pass-2 Grade block
+          {t(lang, 'block.addGrade')}
         </button>
       )}
     </div>
@@ -49,6 +51,7 @@ export function CenterPanel() {
 }
 
 function BaseCard() {
+  const lang = useEditor((s) => s.lang)
   const recipe = useEditor((s) => s.recipe)
   const baseBlock = findBlock('BASE', recipe.base)
   const setSlotValue = useEditor((s) => s.setSlotValue)
@@ -62,13 +65,13 @@ function BaseCard() {
     <div className="card">
       <div className="flex items-center justify-between mb-2">
         <div>
-          <div className="label">Global / base</div>
+          <div className="label">{t(lang, 'block.globalBase')}</div>
           <div className="font-medium text-ink-100">{baseBlock.name}</div>
         </div>
       </div>
       <details>
         <summary className="text-xs text-ink-300 cursor-pointer hover:text-ink-100">
-          Base parameters ({visibleSlots.length})
+          {t(lang, 'block.baseParams')} ({visibleSlots.length})
         </summary>
         <div className="space-y-3 pt-3 mt-2 border-t border-ink-700">
           {visibleSlots.map((slot) => {

@@ -2,18 +2,19 @@ import { useMemo, useRef, useState } from 'react'
 import { useEditor } from '../store/editor'
 import { recipesForUseCase } from '../data/recipes'
 import type { GenerationType, ValidationIssue } from '../lib/types'
+import { t } from '../lib/i18n'
 
-const GEN_OPTIONS: { value: GenerationType; label: string; description: string }[] = [
-  { value: 'catalog', label: 'Catalog', description: 'Studio backdrop, controlled lighting' },
-  { value: 'lifestyle', label: 'Lifestyle', description: 'Real-world location, integrated lighting' },
-  { value: 'ugc', label: 'UGC', description: 'Authentic smartphone photo' },
+const GEN_OPTIONS: { value: GenerationType; labelKey: string; descKey: string }[] = [
+  { value: 'catalog', labelKey: 'gen.catalog', descKey: 'gen.catalog.desc' },
+  { value: 'lifestyle', labelKey: 'gen.lifestyle', descKey: 'gen.lifestyle.desc' },
+  { value: 'ugc', labelKey: 'gen.ugc', descKey: 'gen.ugc.desc' },
 ]
 
 const UC_OPTIONS = [
-  { value: 'UC1', label: 'Evening / cocktail' },
-  { value: 'UC2', label: 'Office / business' },
-  { value: 'UC3', label: 'Summer / resort' },
-  { value: 'UC4', label: 'Casual / dress' },
+  { value: 'UC1', key: 'uc.UC1' },
+  { value: 'UC2', key: 'uc.UC2' },
+  { value: 'UC3', key: 'uc.UC3' },
+  { value: 'UC4', key: 'uc.UC4' },
 ]
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function LeftPanel({ issues }: Props) {
+  const lang = useEditor((s) => s.lang)
   const generation = useEditor((s) => s.generation)
   const setGeneration = useEditor((s) => s.setGeneration)
   const useCase = useEditor((s) => s.useCase)
@@ -51,7 +53,7 @@ export function LeftPanel({ issues }: Props) {
 
   return (
     <div className="space-y-5">
-      <Section label="Generation type">
+      <Section label={t(lang, 'gen.label')}>
         <div className="grid grid-cols-1 gap-1.5">
           {GEN_OPTIONS.map((opt) => {
             const active = generation === opt.value
@@ -67,8 +69,8 @@ export function LeftPanel({ issues }: Props) {
                     : 'bg-ink-800 border-ink-700 hover:border-ink-500')
                 }
               >
-                <div className="text-sm font-medium text-ink-100">{opt.label}</div>
-                <div className="text-xs text-ink-300">{opt.description}</div>
+                <div className="text-sm font-medium text-ink-100">{t(lang, opt.labelKey)}</div>
+                <div className="text-xs text-ink-300">{t(lang, opt.descKey)}</div>
               </button>
             )
           })}
@@ -76,29 +78,32 @@ export function LeftPanel({ issues }: Props) {
       </Section>
 
       {generation !== 'catalog' && (
-        <Section label="Use case (optional filter)">
+        <Section label={t(lang, 'uc.label')}>
           <select
             className="select"
             value={useCase ?? ''}
             onChange={(e) => setUseCase(e.target.value || undefined)}
           >
-            <option value="">All use cases</option>
+            <option value="">{t(lang, 'uc.all')}</option>
             {UC_OPTIONS.map((uc) => (
               <option key={uc.value} value={uc.value}>
-                {uc.label}
+                {t(lang, uc.key)}
               </option>
             ))}
           </select>
         </Section>
       )}
 
-      <Section label="Recipe" hint={recipe.custom ? 'modified' : undefined}>
+      <Section
+        label={t(lang, 'recipe.label')}
+        hint={recipe.custom ? t(lang, 'recipe.modified') : undefined}
+      >
         <select
           className="select"
           value={recipeId ?? ''}
           onChange={(e) => setRecipeId(e.target.value)}
         >
-          <optgroup label="Built-in">
+          <optgroup label={t(lang, 'recipe.builtin')}>
             {(useCase ? recipes : allBaseRecipes).map((r) => (
               <option key={r.id} value={r.id}>
                 {r.name}
@@ -106,7 +111,7 @@ export function LeftPanel({ issues }: Props) {
             ))}
           </optgroup>
           {customForBase.length > 0 && (
-            <optgroup label="Custom">
+            <optgroup label={t(lang, 'recipe.custom')}>
               {customForBase.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.name}
@@ -121,7 +126,7 @@ export function LeftPanel({ issues }: Props) {
             className="btn-secondary text-xs"
             onClick={() => setSaveOpen(true)}
           >
-            Save as recipe
+            {t(lang, 'recipe.saveAs')}
           </button>
           <button
             type="button"
@@ -136,14 +141,14 @@ export function LeftPanel({ issues }: Props) {
               URL.revokeObjectURL(url)
             }}
           >
-            Export JSON
+            {t(lang, 'recipe.export')}
           </button>
           <button
             type="button"
             className="btn-secondary text-xs"
             onClick={() => fileInputRef.current?.click()}
           >
-            Import
+            {t(lang, 'recipe.import')}
           </button>
           <input
             ref={fileInputRef}
@@ -155,7 +160,7 @@ export function LeftPanel({ issues }: Props) {
               if (!f) return
               const text = await f.text()
               const ok = importRecipe(text)
-              if (!ok) alert('Import failed: invalid recipe JSON')
+              if (!ok) alert(t(lang, 'recipe.importFailed'))
               if (fileInputRef.current) fileInputRef.current.value = ''
             }}
           />
@@ -167,7 +172,7 @@ export function LeftPanel({ issues }: Props) {
               autoFocus
               type="text"
               className="input mb-2"
-              placeholder="Recipe name"
+              placeholder={t(lang, 'recipe.saveName')}
               value={saveName}
               onChange={(e) => setSaveName(e.target.value)}
             />
@@ -182,7 +187,7 @@ export function LeftPanel({ issues }: Props) {
                   setSaveOpen(false)
                 }}
               >
-                Save
+                {t(lang, 'recipe.save')}
               </button>
               <button
                 type="button"
@@ -192,7 +197,7 @@ export function LeftPanel({ issues }: Props) {
                   setSaveName('')
                 }}
               >
-                Cancel
+                {t(lang, 'recipe.cancel')}
               </button>
             </div>
           </div>
@@ -201,7 +206,7 @@ export function LeftPanel({ issues }: Props) {
         {customForBase.length > 0 && (
           <details className="mt-2">
             <summary className="text-xs text-ink-300 cursor-pointer hover:text-ink-100">
-              Manage custom recipes ({customForBase.length})
+              {t(lang, 'recipe.manageCustom')} ({customForBase.length})
             </summary>
             <ul className="mt-2 space-y-1">
               {customForBase.map((r) => (
@@ -214,10 +219,10 @@ export function LeftPanel({ issues }: Props) {
                     type="button"
                     className="text-ink-400 hover:text-bad"
                     onClick={() => {
-                      if (confirm(`Delete "${r.name}"?`)) deleteCustom(r.id)
+                      if (confirm(t(lang, 'recipe.confirmDelete', { name: r.name }))) deleteCustom(r.id)
                     }}
                   >
-                    delete
+                    {t(lang, 'recipe.delete')}
                   </button>
                 </li>
               ))}
@@ -226,7 +231,7 @@ export function LeftPanel({ issues }: Props) {
         )}
       </Section>
 
-      <Section label="Editing mode">
+      <Section label={t(lang, 'mode.label')}>
         <div className="grid grid-cols-3 gap-1 p-1 bg-ink-700 rounded-md">
           {(['recipe', 'block', 'expert'] as const).map((m) => (
             <button
@@ -238,28 +243,28 @@ export function LeftPanel({ issues }: Props) {
                 (mode === m ? 'bg-accent-500 text-white' : 'text-ink-200 hover:text-white')
               }
             >
-              {m}
+              {t(lang, `mode.${m}`)}
             </button>
           ))}
         </div>
-        <p className="help-text mt-2">
-          {mode === 'recipe' && 'Pick a built-in recipe and copy. Fastest path.'}
-          {mode === 'block' && 'Swap blocks. Expert parameters hidden under each card.'}
-          {mode === 'expert' && 'Every parameter visible — slidable, swappable, savable.'}
-        </p>
+        <p className="help-text mt-2">{t(lang, `mode.${mode}.help`)}</p>
       </Section>
 
-      <Section label="Validation">
+      <Section label={t(lang, 'val.label')}>
         {issues.length === 0 ? (
-          <div className="chip bg-good/20 text-good">All checks passed</div>
+          <div className="chip bg-good/20 text-good">{t(lang, 'val.allPassed')}</div>
         ) : (
           <div className="space-y-2">
             <div className="flex gap-2">
               {errorCount > 0 && (
-                <span className="chip bg-bad/20 text-bad">{errorCount} error</span>
+                <span className="chip bg-bad/20 text-bad">
+                  {errorCount} {t(lang, 'val.error')}
+                </span>
               )}
               {warnCount > 0 && (
-                <span className="chip bg-warn/20 text-warn">{warnCount} warning</span>
+                <span className="chip bg-warn/20 text-warn">
+                  {warnCount} {t(lang, 'val.warning')}
+                </span>
               )}
             </div>
             <ul className="space-y-1">
@@ -284,7 +289,7 @@ export function LeftPanel({ issues }: Props) {
       </Section>
 
       <button type="button" onClick={reset} className="btn-ghost text-xs w-full justify-start">
-        Reset to defaults
+        {t(lang, 'recipe.resetAll')}
       </button>
     </div>
   )
