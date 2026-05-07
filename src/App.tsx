@@ -3,7 +3,7 @@ import { useEditor } from './store/editor'
 import { LeftPanel } from './components/LeftPanel'
 import { CenterPanel } from './components/CenterPanel'
 import { RightPanel } from './components/RightPanel'
-import { composePrompt } from './lib/composer'
+import { composeAuto } from './lib/composer'
 import { validate } from './lib/validate'
 import { t, type Lang } from './lib/i18n'
 
@@ -14,7 +14,7 @@ function App() {
   const generation = useEditor((s) => s.generation)
   const lang = useEditor((s) => s.lang)
 
-  const composed = useMemo(() => composePrompt(recipe), [recipe])
+  const composed = useMemo(() => composeAuto(recipe), [recipe])
   const issues = useMemo(() => validate({ generation, recipe }), [generation, recipe])
 
   const [tab, setTab] = useState<Tab>('blocks')

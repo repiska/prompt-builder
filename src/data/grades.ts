@@ -24,6 +24,8 @@ Blacks: deepen by {{blacks_deepen}} points. Midtone contrast: increase by {{midt
 
 [NEGATIVE]
 No recomposition. No new accessories. No fabric alteration. No face retouching beyond color grade. No artistic filters. No film grain. No bloom. No HDR look.`,
+    prose_template:
+      "Apply premium editorial color grading and dimensional lighting on top of the locked composition. Replace the background with a radial gradient — bright at {{gradient_center}} directly behind {{subject}}'s head and torso, fading smoothly to {{gradient_corners}} at all four corners; the floor continues the gradient seamlessly. A clear directional key light from {{light_side}} at 45° makes her lit side noticeably brighter and warmer; her shadow side falls to soft shadow about {{shadow_density}}% darker than the lit side, with a thin rim light tracing her hair and shoulder edge on that shadow side roughly {{rim_brightness}}% brighter than nearby skin midtones. Color grade: blacks deepened by {{blacks_deepen}} points, midtone contrast +{{midtone_contrast}}%, highlights protected from blow-out, garment saturation +{{garment_saturation}}% (garment only — skin stays neutral-warm). {{splittone_clause}}. {{genre_anchor}}. Composition, accessories and fabric stay untouched; no artistic filters, film grain, bloom, or HDR look.",
     slots: [
       {
         id: 'gradient_center',
@@ -126,6 +128,8 @@ No recomposition. No new accessories. No fabric alteration. No face retouching b
     stage: 'pass2',
     template:
       'Warm golden grade. Highlights pulled warm (+{{warmth}} temperature), shadows neutral with hint of warm orange in deepest areas, skin glowing slightly amber-warm, saturation +{{sat_overall}}% overall and +{{sat_warm}}% on warm tones. Suits: golden hour, sunset, restaurant, outdoor warm scenes.',
+    prose_template:
+      "Color grade is warm and golden: highlights pulled warm by {{warmth}} points, shadows mostly neutral with a hint of warm orange in the deepest areas, skin glowing slightly amber-warm. Saturation +{{sat_overall}}% overall and +{{sat_warm}}% on warm tones.",
     slots: [
       { id: 'warmth', type: 'number_slider', label: 'Warmth', label_ru: 'Теплота', default: 5, min: 2, max: 10, step: 1, unit: 'pts' },
       { id: 'sat_overall', type: 'number_slider', label: 'Sat overall', label_ru: 'Насыщенность общая', default: 6, min: 0, max: 12, step: 1, unit: '%' },
@@ -142,6 +146,8 @@ No recomposition. No new accessories. No fabric alteration. No face retouching b
     stage: 'pass2',
     template:
       'Clean balanced editorial grade. Subtle orange/teal split (very mild, print-magazine style), skin tones true-to-life neither warm nor cool, blacks deepened by {{blacks}} points, saturation +{{sat}}% overall. Suits: office, urban, daytime, premium e-commerce mood.',
+    prose_template:
+      "Color grade is clean editorial: a subtle orange-and-teal split at print-magazine strength, skin tones true to life — neither warm nor cool. Blacks deepened by {{blacks}} points, saturation +{{sat}}% overall.",
     slots: [
       { id: 'blacks', type: 'number_slider', label: 'Blacks', label_ru: 'Глубина чёрного', default: 8, min: 4, max: 14, step: 1, unit: 'pts' },
       { id: 'sat', type: 'number_slider', label: 'Saturation', label_ru: 'Насыщенность', default: 4, min: 0, max: 10, step: 1, unit: '%' },
@@ -157,6 +163,8 @@ No recomposition. No new accessories. No fabric alteration. No face retouching b
     stage: 'pass2',
     template:
       'Soft pastel grade. Highlights lifted (+{{highlights}} brightness, hint of soft cream warmth), shadows lifted slightly (faded film look, NOT crushed blacks), saturation -{{sat_minus}}% overall and +{{sat_garment}}% on garment only, skin glowing softly diffused. Suits: summer, beach, vineyard, light airy locations.',
+    prose_template:
+      "Color grade is soft pastel: highlights lifted by {{highlights}} points with a hint of cream warmth, shadows lifted slightly into a faded-film look (no crushed blacks), saturation -{{sat_minus}}% overall and +{{sat_garment}}% on the garment only. Skin glows softly diffused.",
     slots: [
       { id: 'highlights', type: 'number_slider', label: 'Highlights lift', label_ru: 'Поднятие светов', default: 8, min: 4, max: 14, step: 1, unit: 'pts' },
       { id: 'sat_minus', type: 'number_slider', label: 'Sat overall (-)', label_ru: 'Насыщ. общая (-)', default: 5, min: 0, max: 12, step: 1, unit: '%' },
@@ -173,6 +181,8 @@ No recomposition. No new accessories. No fabric alteration. No face retouching b
     stage: 'pass2',
     template:
       'Moody cinematic grade. Blacks deep (+{{blacks}} points), shadows cool, highlights warm but controlled (no blow-out), strong orange/teal split, saturation -{{sat_minus}}% overall and +{{sat_warm}}% on warm tones, skin slightly desaturated for filmic feel. Suits: evening, rooftop bar, hotel lobby, dramatic locations.',
+    prose_template:
+      'Color grade is moody cinematic: blacks deepened by {{blacks}} points, shadows cool, highlights warm but controlled, a strong orange-and-teal split, saturation {{sat_minus}}% lower overall and {{sat_warm}}% higher on warm tones, skin slightly desaturated for filmic feel.',
     slots: [
       { id: 'blacks', type: 'number_slider', label: 'Blacks (+)', label_ru: 'Чёрные (+)', default: 15, min: 8, max: 22, step: 1, unit: 'pts' },
       { id: 'sat_minus', type: 'number_slider', label: 'Sat overall (-)', label_ru: 'Насыщ. общая (-)', default: 3, min: 0, max: 10, step: 1, unit: '%' },
@@ -189,6 +199,8 @@ No recomposition. No new accessories. No fabric alteration. No face retouching b
     stage: 'pass2',
     template:
       'Subtle VSCO-style warm phone filter. Highlights warm +{{warmth}}, shadows lifted slightly, saturation +{{sat}}%, slight grain in shadows, mild warmth boost on skin. Keep "phone photo" character — do not make it look professional.',
+    prose_template:
+      "Apply a subtle VSCO-style warm phone filter: highlights warmed by +{{warmth}}, shadows lifted slightly, saturation +{{sat}}%, slight grain in the shadows, a mild warmth boost on skin. Keep the \"phone photo\" character — this should not look professional.",
     slots: [
       { id: 'warmth', type: 'number_slider', label: 'Warmth', label_ru: 'Теплота', default: 6, min: 2, max: 10, step: 1, unit: 'pts' },
       { id: 'sat', type: 'number_slider', label: 'Saturation', label_ru: 'Насыщенность', default: 4, min: 0, max: 10, step: 1, unit: '%' },
@@ -204,6 +216,8 @@ No recomposition. No new accessories. No fabric alteration. No face retouching b
     stage: 'pass2',
     template:
       'Subtle muted phone filter. Saturation -{{sat_minus}}%, slight cool shift in shadows, highlights slightly desaturated, contrast +{{contrast}}%, clean minimal feel. Keep "phone photo" character.',
+    prose_template:
+      "Apply a subtle muted phone filter: saturation -{{sat_minus}}%, a slight cool shift in shadows, highlights slightly desaturated, contrast +{{contrast}}%, a clean minimal feel. Keep the \"phone photo\" character.",
     slots: [
       { id: 'sat_minus', type: 'number_slider', label: 'Saturation (-)', label_ru: 'Насыщенность (-)', default: 8, min: 4, max: 14, step: 1, unit: '%' },
       { id: 'contrast', type: 'number_slider', label: 'Contrast (+)', label_ru: 'Контраст (+)', default: 5, min: 0, max: 10, step: 1, unit: '%' },
@@ -219,6 +233,8 @@ No recomposition. No new accessories. No fabric alteration. No face retouching b
     stage: 'pass2',
     template:
       'Default iPhone-vibrance enhanced filter. Saturation +{{sat}}%, contrast +{{contrast}}%, blacks slightly deeper, highlights slightly warm, default phone HDR look enhanced. Keep "phone photo" character.',
+    prose_template:
+      "Apply a default iPhone-vibrance-enhanced filter: saturation +{{sat}}%, contrast +{{contrast}}%, blacks slightly deeper, highlights slightly warm, the default phone HDR look enhanced. Keep the \"phone photo\" character.",
     slots: [
       { id: 'sat', type: 'number_slider', label: 'Saturation (+)', label_ru: 'Насыщенность (+)', default: 10, min: 4, max: 16, step: 1, unit: '%' },
       { id: 'contrast', type: 'number_slider', label: 'Contrast (+)', label_ru: 'Контраст (+)', default: 8, min: 4, max: 14, step: 1, unit: '%' },

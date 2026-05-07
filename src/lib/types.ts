@@ -158,6 +158,11 @@ export interface Block {
   /** Whether this block is run at pass-2 (for GRADE). */
   stage?: 'pass1' | 'pass2'
   template: string
+  prose_template?: string
+  prose_subject_intro?: string
+  prose_aesthetic?: string
+  prose_integration_rule?: string
+  prose_reference_rule?: string
   slots: Slot[]
   tags: BlockTags
 }

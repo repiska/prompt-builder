@@ -98,6 +98,11 @@ export const BUILTIN_RECIPES: Recipe[] = [
   ugc('UGC_CAS_C', 'UGC: OOTD home', 'UGC: OOTD дома', 'UC4', 'U5'),
 
   ugc('UGC_DETAIL', 'UGC: Detail close-up', 'UGC: деталь крупным планом', 'UC1', 'U9'),
+
+  ugc('UGC_GRWM', 'UGC: Get ready (GRWM)', 'UGC: собираемся вместе', 'UC1', 'U14'),
+  ugc('UGC_FRIEND_TABLE', 'UGC: Friend POV at table', 'UGC: подруга снимает за столом', 'UC4', 'U15'),
+  ugc('UGC_GROUP', 'UGC: Friend group selfie', 'UGC: групповое селфи', 'UC1', 'U16'),
+  ugc('UGC_WINDOW', 'UGC: Store window reflection', 'UGC: отражение в витрине', 'UC4', 'U17'),
 ]
 
 export function recipesForBase(baseId: string): Recipe[] {

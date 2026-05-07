@@ -25,6 +25,8 @@ export const CAMERA_BLOCKS: Block[] = [
     description_ru: 'Базовая каталожная камера: 85mm, всё чёткое, в полный рост.',
     template:
       '{{focal_length}}mm lens equivalent, {{angle}} perspective, shot from {{height}} height, standard portrait compression, full body in frame {{frame_fill_text}}, equal margin top and bottom, model occupies ~{{frame_fill_pct}}% frame height, aperture f/{{aperture}} ({{aperture_effect}}), vertical 3:4 framing.',
+    prose_template:
+      "Shot at {{focal_length}}mm equivalent, {{angle}} perspective, from {{height}} height — standard portrait compression. Full body in the frame {{frame_fill_text}}, with equal margin top and bottom; {{subject}} occupies roughly {{frame_fill_pct}}% of the frame height. Aperture f/{{aperture}} ({{aperture_effect}}). Vertical 3:4 framing.",
     slots: [
       {
         id: 'focal_length',
@@ -100,6 +102,8 @@ export const CAMERA_BLOCKS: Block[] = [
     description_ru: 'Средний план для деталей одежды: компрессия 100mm, всё чёткое.',
     template:
       '{{focal_length}}mm lens equivalent (slight compression for product detail), {{angle}}, shot from {{height}} height, framed from {{frame_top}} to {{frame_bottom}} — tighter than full body, fabric texture clearly readable. Aperture f/{{aperture}} ({{aperture_effect}}). Vertical 3:4 framing.',
+    prose_template:
+      "Shot at {{focal_length}}mm equivalent (slight compression for product detail), {{angle}}, from {{height}} height. {{subject}} is framed from {{frame_top}} to {{frame_bottom}} — tighter than full body — so the fabric texture reads clearly. Aperture f/{{aperture}} ({{aperture_effect}}). Vertical 3:4 framing.",
     slots: [
       {
         id: 'focal_length',
@@ -176,6 +180,8 @@ export const CAMERA_BLOCKS: Block[] = [
     description_ru: 'Камера сверху-вниз с уровня пояса для показа подола и драпировки.',
     template:
       '{{focal_length}}mm lens equivalent, slight high angle (camera at waist height, pointed slightly downward) to show skirt drape and floor, framed from {{frame_top}} to floor, lower body and garment hem in focus. Aperture f/{{aperture}} (full depth of field). Vertical 3:4 framing.',
+    prose_template:
+      "Shot at {{focal_length}}mm equivalent at a slight high angle — camera at waist height, pointed slightly downward — to show the skirt drape and floor. Framed from {{frame_top}} to the floor; {{subject}}'s lower body and the garment hem stay in focus. Aperture f/{{aperture}}, full depth of field. Vertical 3:4 framing.",
     slots: [
       {
         id: 'focal_length',
@@ -216,6 +222,8 @@ export const CAMERA_BLOCKS: Block[] = [
     description_ru: 'Широкий угол с показом окружения: 35mm, открытая диафрагма, модель в среде.',
     template:
       '{{focal_length}}mm lens equivalent (captures environment context), aperture f/{{aperture}} ({{aperture_effect}}), {{angle}}. Full body in frame. Composition: model takes {{composition}}, environment fills remainder. {{aspect}}.',
+    prose_template:
+      "Shot at {{focal_length}}mm equivalent — wide enough to capture environment context. Aperture f/{{aperture}} ({{aperture_effect}}), {{angle}}. {{subject}} is full body in the frame, sitting {{composition}} of the composition while the environment fills the remainder. Framing: {{aspect}}.",
     slots: [
       {
         id: 'focal_length',
@@ -280,6 +288,8 @@ export const CAMERA_BLOCKS: Block[] = [
     description_ru: '«Натуральный» 50mm портрет: малая ГРИП, окружение размыто но узнаваемо.',
     template:
       '{{focal_length}}mm lens equivalent (natural perspective), aperture f/{{aperture}} ({{aperture_effect}}), {{angle}}, framed from {{frame_top}} up — environmental portrait. Vertical 3:4.',
+    prose_template:
+      'Captured at {{focal_length}}mm equivalent, aperture f/{{aperture}} ({{aperture_effect}}), {{angle}}, framed from {{frame_top}} up — an environmental portrait. The background dissolves into creamy bokeh while {{subject}} remains tack-sharp.',
     slots: [
       {
         id: 'focal_length',
@@ -333,6 +343,8 @@ export const CAMERA_BLOCKS: Block[] = [
     description_ru: 'Hero-съёмка: 85mm с открытой диафрагмой, фон сильно размыт, модель — главное.',
     template:
       '{{focal_length}}mm lens equivalent (compresses background for hero portrait energy), aperture f/{{aperture}} ({{aperture_effect}}), {{angle}} (camera at chest level pointed slightly upward) for elongated silhouette. Framed {{framing}}. Vertical 3:4.',
+    prose_template:
+      "Shot at {{focal_length}}mm equivalent — compressing the background for hero-portrait energy. Aperture f/{{aperture}} ({{aperture_effect}}), {{angle}} (camera at chest level, pointed slightly upward) elongates {{subject}}'s silhouette. Framed {{framing}}. Vertical 3:4.",
     slots: [
       {
         id: 'focal_length',
@@ -387,6 +399,8 @@ export const CAMERA_BLOCKS: Block[] = [
     description_ru: 'Только справочно — для UGC камера встроена внутрь блока SCENARIO.',
     template:
       'NOTE: UGC scenarios bundle camera-character into the SCENARIO block. Phone main wide ~26mm or selfie camera, aperture f/1.8 phone-style, phone HDR rendering. Vertical 3:4 or 9:16 portrait.',
+    prose_template:
+      "Camera character is folded into the UGC scenario above — a phone main wide (~26mm equivalent) or selfie camera, aperture f/1.8 phone-style, phone HDR rendering. Vertical 3:4 or 9:16 portrait framing.",
     slots: [],
     tags: { compatible_with: ['ugc_base'] },
   },

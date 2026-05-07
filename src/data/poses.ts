@@ -12,6 +12,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Анфас, вес слегка перенесён на одну ногу — самая базовая каталожная поза.',
     template:
       "Model standing facing camera, weight slightly on one leg in natural contrapposto, arms relaxed at sides, shoulders open, soft confident expression, {{gaze}}, {{expression}}.",
+    prose_template:
+      "{{subject}} stands facing the camera, weight slightly shifted to one leg in a natural contrapposto, arms relaxed at her sides and shoulders open. Her expression is softly confident — {{gaze}}, {{expression}}.",
     slots: [
       {
         id: 'gaze',
@@ -48,6 +50,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Корпус развёрнут на 3/4, рука на бедре. Журнальная редакторская энергия.',
     template:
       "Model's torso rotated {{rotation_deg}} degrees to camera-{{rotation_side}}, weight shifted to back leg in {{stance_intensity}} contrapposto, one hand resting naturally on hip with elbow out (creates triangle of negative space at waist), other arm relaxed at side, shoulders open and relaxed, chin {{chin_position}}, {{gaze_description}}, {{expression}} — magazine editorial energy.",
+    prose_template:
+      "{{subject}}'s torso is rotated {{rotation_deg}}° toward the camera-{{rotation_side}}, weight shifted to her back leg in a {{stance_intensity}} contrapposto. One hand rests naturally on her hip — elbow out, opening a triangle of negative space at the waist — while the other arm hangs relaxed at her side. Shoulders open, chin {{chin_position}}; she meets the lens with {{gaze_description}} and {{expression}}. Magazine editorial energy.",
     slots: [
       {
         id: 'rotation_deg',
@@ -132,6 +136,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Модель в профиль — фокус на силуэте и крое одежды.',
     template:
       'Model standing in profile facing {{profile_side}} of frame, arms naturally at sides, weight evenly distributed, eyes looking forward (in direction of profile), {{expression}}. Body silhouette is the focus — straight posture, no twist.',
+    prose_template:
+      "{{subject}} stands in profile facing the {{profile_side}} of the frame, arms naturally at her sides and weight evenly distributed. She looks forward in the direction of the profile with {{expression}}. The silhouette is the subject — straight posture, no twist.",
     slots: [
       {
         id: 'profile_side',
@@ -167,6 +173,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Спиной к камере с поворотом головы — показывает спинку платья.',
     template:
       'Model with back to camera, head turned to look {{look_intensity}} over {{shoulder_side}} shoulder toward camera, arms relaxed at sides, weight slightly on one leg, {{expression}}, hair naturally falling. Shows back of garment.',
+    prose_template:
+      "{{subject}} stands with her back to the camera, head turned to look {{look_intensity}} over her {{shoulder_side}} shoulder. Arms hang relaxed at her sides, weight slightly on one leg, hair falling naturally. The back of the garment is fully visible. Expression: {{expression}}.",
     slots: [
       {
         id: 'look_intensity',
@@ -213,6 +221,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Модель в движении — пойман середина шага, ткань и волосы развеваются.',
     template:
       'Model walking, captured mid-step with one foot forward and one back, slight movement in dress hem and hair, one hand {{hand_action}}, other arm relaxed, looking {{gaze_direction}} with relaxed natural expression. Captured candidly — not posed, caught in motion.',
+    prose_template:
+      "{{subject}} is walking — caught mid-step with one foot forward and one back. The hem of her dress and her hair carry a hint of motion. One hand is {{hand_action}}, the other arm relaxed; she looks {{gaze_direction}} with a relaxed natural expression. Candid energy — not posed, caught in stride.",
     slots: [
       {
         id: 'hand_action',
@@ -250,6 +260,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Сидячая поза за столом — энергия живого разговора.',
     template:
       'Model seated at a table, leaning {{lean_direction}}, one hand resting near a {{table_object}} on the table, other in lap or gesturing, body turned three-quarter to camera, looking softly toward camera with {{expression}}. Natural conversation energy.',
+    prose_template:
+      "{{subject}} is seated at a small table, leaning {{lean_direction}}, one hand resting near a {{table_object}} and the other in her lap. Her body is rotated three-quarter to camera; she gazes softly toward the lens with a {{expression}} — natural mid-conversation energy.",
     slots: [
       {
         id: 'lean_direction',
@@ -297,6 +309,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Поза «момент» — модель смотрит вдаль, не в камеру.',
     template:
       'Model standing turned three-quarter away from camera, looking off into the distance (away from camera), hand resting lightly on a {{rest_object}}, weight on back leg, hair moving slightly in breeze, {{expression}} expression — NOT looking at camera. Environmental "moment" energy.',
+    prose_template:
+      "{{subject}} stands turned three-quarter away from the camera, gazing off into the distance — not at the lens. One hand rests lightly on a {{rest_object}}, weight on her back leg, hair lifting slightly in a breeze. Her expression is {{expression}}. An environmental \"moment\" shot.",
     slots: [
       {
         id: 'rest_object',
@@ -333,6 +347,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Движение в кадре — подол летит, волосы взмётнулись.',
     template:
       'Model captured mid-twirl: body rotating, dress hem flying outward in circular arc, hair lifted following rotation, arms either extended for balance or relaxed swinging. Face in {{face_orientation}} to camera, {{expression}}, eyes might be closed or looking down at the dress. NOT a static held pose — captured in real movement.',
+    prose_template:
+      "{{subject}} is captured mid-twirl: body rotating, dress hem flying outward in a circular arc, hair lifted in the rotation. Her arms are either extended for balance or relaxed and swinging. Her face is in {{face_orientation}} to the camera with {{expression}}; her eyes may be closed or glancing down at the dress. Not a static held pose — real movement.",
     slots: [
       {
         id: 'face_orientation',
@@ -368,6 +384,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Расслабленный наклон к опоре — энергия лёгкости.',
     template:
       'Model leaning casually with {{contact_part}} against a {{lean_object}}, weight shifted, one leg slightly crossed in front, hands {{hands_position}}, body turned three-quarter to camera, looking at camera with {{expression}}. Effortless lean energy.',
+    prose_template:
+      "{{subject}} leans casually with her {{contact_part}} against a {{lean_object}}, weight shifted, one leg slightly crossed in front. Her hands are {{hands_position}}; her body is rotated three-quarter to the camera. She meets the lens with {{expression}}. Effortless lean energy.",
     slots: [
       {
         id: 'contact_part',
@@ -426,6 +444,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Селфи перед зеркалом — поза для UGC.',
     template:
       'Model standing facing a mirror, holding a smartphone with {{hand_count}} at chest or face level — phone clearly visible in reflection (partial face occlusion is OK — realistic). Slight hip pop, weight on one leg, casual outfit-check energy. Soft natural expression, not modeling — just checking the look. Other hand may lightly touch the dress or relax at side.',
+    prose_template:
+      "{{subject}} stands facing a mirror, holding a smartphone with {{hand_count}} at chest or face level — the phone is clearly visible in the reflection (partial face occlusion is fine, this is realistic). Slight hip pop, weight on one leg, casual outfit-check energy. Her expression is soft and natural — not modeling, just checking the look. Her other hand may lightly touch the dress or rest at her side.",
     slots: [
       {
         id: 'hand_count',
@@ -449,6 +469,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Поза «outfit of the day» — анфас, лёгкая стеснительность, осознанная демонстрация образа.',
     template:
       'Model standing facing camera, full body in frame, weight on one leg, hands {{hand_position}}. Casual aware-of-camera expression — {{expression}}. NOT modeling, but deliberately presenting the outfit (this is a chosen "outfit of the day" pose, slightly self-conscious in a charming way).',
+    prose_template:
+      "{{subject}} stands facing the camera, full body in frame, weight on one leg, hands {{hand_position}}. Her expression is {{expression}} — casually aware of the camera, not modeling but deliberately presenting the outfit. This is a chosen \"outfit of the day\" pose, slightly self-conscious in a charming way.",
     slots: [
       {
         id: 'hand_position',
@@ -483,6 +505,8 @@ export const POSE_BLOCKS: Block[] = [
     description_ru: 'Крупный план детали одежды — лица в кадре нет (или только частично).',
     template:
       "Hand visible in frame holding up a portion of the garment — {{detail_focus}} — toward camera. The fabric/detail IS the subject. Model's face NOT in frame or only partially at edge.",
+    prose_template:
+      "A hand is visible in the frame holding up a portion of the garment — {{detail_focus}} — toward the camera. The fabric and detail ARE the subject. {{subject}}'s face is not in the frame, or only partially at the edge.",
     slots: [
       {
         id: 'detail_focus',

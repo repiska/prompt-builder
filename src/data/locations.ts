@@ -1,5 +1,21 @@
 import type { Block } from '../lib/types'
 
+const LOCATION_PROSE: Record<string, string> = {
+  L0: "The setting is a clean studio with a neutral grey backdrop in {{bg_color}}, no texture. {{floor_treatment}}, with a soft natural contact shadow under {{subject}}'s feet. No studio equipment is visible — no softboxes, no light stands. A {{light_softness}} key light comes from {{light_direction_text}} at {{light_angle}}°, with {{fill_intensity}} fill from the opposite side; {{shadow_character}}. Color temperature {{color_temp}}K. A controlled studio environment, not an editorial set.",
+  L1m: "The scene is an upscale restaurant on a quiet evening. Behind {{subject}}: a leather banquette, dark wood paneling, the soft silhouettes of distant diners, the far glow of a bar. A single warm pendant lamp from above-left spills {{color_temp_text}} light across her face and one shoulder; candlelight on the table fills from below-right. Mood: {{mood}}, with {{shadow_intensity}} shadows.",
+  L2m: "The scene is a rooftop bar at golden hour. Behind {{subject}}: a cityscape with the low sun behind distant buildings, the sky gradient running from gold into soft pink, far skyscrapers slightly hazy. A glass railing may sit partially in the frame, warm string lights blurred into bokeh. Direct golden-hour sun rakes in from camera-right at a low angle, throwing a warm backlight rim across her hair and shoulder; warm ambient bounces back from the sky as fill. {{shadow_intensity}} shadows, {{mood}} mood.",
+  L3m: "The scene is a modern office interior with floor-to-ceiling windows. Behind {{subject}}: a wooden desk in soft focus, a monstera plant, a large window flooding the room with daylight, neutral beige and white tones. A large window from camera-left provides {{color_temp_text}} key light; gentle ambient bounces back from the white walls as fill. {{shadow_intensity}} shadow on her right side. Mood: {{mood}}, but not flat.",
+  L4m: "The scene is inside a stylish business-district café. Behind {{subject}}: a blurred bar with an espresso machine, plants, warm wood, a hint of the street through a large window. A marble table with a cappuccino cup may sit in the foreground. Window light enters from camera-right ({{color_temp_text}}); warm interior ambient fills from the back — mixed lighting that reads as real. {{shadow_intensity}} shadows, {{mood}} mood.",
+  L5m: "The scene is a narrow Mediterranean street with whitewashed walls and pale blue shutters. Around {{subject}}: cobblestones underfoot, flowering bougainvillea spilling over a wall, a hint of sea between buildings in the distance. Bright direct Mediterranean sun comes from above-right ({{color_temp_text}}); warm bounce off the white walls fills the shadow side. High contrast, {{shadow_intensity}} shadows, {{mood}} mood.",
+  L6m: "The scene is a hotel terrace beside an infinity pool. Behind {{subject}}: turquoise water, the distant horizon — sea or mountains — white architectural lines, palm leaves softly at the frame edge. She is in bright open shade under the terrace overhang — even, soft, luxurious. Cool reflections from the pool dance on her lower body; a subtle directional light comes from above. {{color_temp_text}}, {{shadow_intensity}} shadows, {{mood}} mood.",
+  L7m: "The scene is an urban park with mature trees. Around {{subject}}: a dappled green canopy, soft sunlight filtering through leaves, a blurred path with distant walkers, a suggestion of city beyond the trees. Dappled sunlight mixes direct sun and shade — warm golden patches fall on her shoulder and hair, cooler shadows from the canopy fill the rest. {{color_temp_text}}, mid-afternoon, {{shadow_intensity}} shadows, {{mood}} mood.",
+  L8m: "The scene is the lobby of a luxury hotel in the evening. Behind {{subject}}: marble columns, dark wood paneling, a softly glowing chandelier, a hint of bar with backlit bottles, leather seating receding into deep shadow. Strong directional warm light from above-left — a chandelier or sconce — falls across her face and shoulder ({{color_temp_text}}); the shadow side falls to deep shadow. Strong contrast, {{shadow_intensity}} shadows, {{mood}} low-key mood.",
+  L9m: "The scene is a city street with classic European or New York architecture. Behind {{subject}}: building facades in soft focus, blurred pedestrians, a hint of a café awning, parked cars far behind. She stands in open shade between buildings — a soft directional light comes from above-right ({{color_temp_text}}), with no direct sun on her. {{shadow_intensity}} shadows, cool overall, {{mood}} mood.",
+  L10m: "The scene is a weekend farmer's market. Around {{subject}}: wooden produce crates spilling with flowers and fruit, blurred awnings overhead, warm rustic textures, other people softly in the distance. Morning sun filters warm through the awnings — a gentle directional light from camera-left ({{color_temp_text}}). {{shadow_intensity}} warm shadows, {{mood}} mood.",
+  L11m: "The scene is among vineyard rows in late afternoon. Around {{subject}}: parallel rows of grape vines stretching toward soft hills, a warm rolling landscape, a hint of a stone farmhouse or cypress trees in the distance, golden vegetation. Late-afternoon sun rakes in low from behind, throwing a warm rim on her hair and shoulder ({{color_temp_text}}); long warm {{shadow_intensity}} shadows fall across the rows. Atmospheric haze softens the distant hills. {{mood}} mood.",
+  L12m: "The scene is an outdoor garden party. Behind {{subject}}: a soft-focus garden — flowering hedges, round tables with white linen and floral centerpieces in deep blur, warm string lights barely visible in the background bokeh, a lush green-and-white palette. Bright open shade (cloud cover or shaded by trees) gives soft, even, flattering light ({{color_temp_text}}); slight warm bounce comes back from the surroundings. {{shadow_intensity}} shadows, {{mood}} mood.",
+}
+
 export const LOCATION_BLOCKS: Block[] = [
   {
     type: 'LOCATION',
@@ -129,6 +145,7 @@ export const LOCATION_BLOCKS: Block[] = [
         'Inside an upscale restaurant in the evening. Background: blurred shapes of other diners, leather banquette, dark wood paneling, hint of bar in distance. Foreground may include corner of table with wine glass and dim candle. Lighting: warm tungsten ambient ({{color_temp_text}}), candlelight as fill, {{shadow_intensity}} shadows, {{mood}} overall mood. Light from above-left (pendant lamp), warm and soft.',
         'evening',
         'low-key',
+        'warm tungsten ~3200K',
       ],
       [
         'L2m',
@@ -137,6 +154,7 @@ export const LOCATION_BLOCKS: Block[] = [
         'A rooftop bar at golden hour. Background: cityscape with low sun behind buildings, warm sky gradient from gold to soft pink, distant skyscrapers slightly hazy. Foreground may include glass railing partially in frame, warm string lights blurred into bokeh. Lighting: golden hour direct sun from camera-right at low angle (warm backlight rim), warm ambient bounce from sky, {{shadow_intensity}} shadows, {{mood}} mood.',
         'golden hour',
         'cinematic',
+        'warm tungsten ~3200K',
       ],
       [
         'L3m',
@@ -145,6 +163,7 @@ export const LOCATION_BLOCKS: Block[] = [
         'A modern office interior with floor-to-ceiling windows. Background: clean minimal space — wooden desk in soft focus, monstera plant, large window flooding daylight, neutral beige and white interior tones. Lighting: large window light from camera-left, cool neutral daylight, {{shadow_intensity}} shadow on right side, gentle ambient bounce from white walls. {{mood}} but not flat.',
         'mid-morning',
         'bright',
+        'cool daylight ~6000K',
       ],
       [
         'L4m',
@@ -153,6 +172,7 @@ export const LOCATION_BLOCKS: Block[] = [
         'Inside a stylish business-district café. Background: blurred bar with espresso machine, plants, warm wood, hint of street through large window. Foreground may include marble table with cappuccino cup. Lighting: window light from camera-right (cool daylight), warm interior ambient as fill, mixed lighting that reads as real, {{shadow_intensity}} shadows, {{mood}} mood.',
         'morning',
         'inviting',
+        'mixed warm/cool',
       ],
       [
         'L5m',
@@ -161,6 +181,7 @@ export const LOCATION_BLOCKS: Block[] = [
         'A narrow Mediterranean street with whitewashed walls and pale blue shutters. Background: cobblestones, flowering bougainvillea spilling over a wall, hint of sea visible between buildings in distance. Lighting: bright direct Mediterranean sun, high contrast, {{shadow_intensity}} shadows, warm bounce from white walls. Light from above-right. {{mood}} mood.',
         'midday',
         'sun-soaked',
+        'neutral daylight ~5500K',
       ],
       [
         'L6m',
@@ -169,6 +190,7 @@ export const LOCATION_BLOCKS: Block[] = [
         'A hotel terrace by an infinity pool. Background: turquoise pool water, distant horizon (sea or mountains), white architectural elements, palm leaves softly in frame edge. Lighting: bright open shade (under terrace overhang) — even, soft, luxurious. Cool reflections from pool water on lower body. Subtle directional light from above. {{shadow_intensity}} shadows, {{mood}} mood.',
         'midday',
         'resort luxe',
+        'neutral daylight ~5500K',
       ],
       [
         'L7m',
@@ -177,6 +199,7 @@ export const LOCATION_BLOCKS: Block[] = [
         'An urban park with mature trees. Background: dappled green canopy, soft sunlight filtering through leaves, blurred path with distant walkers, suggestion of city beyond trees. Lighting: dappled sunlight (mixed direct sun and shade), warm golden patches falling on shoulder and hair, cooler shadows from canopy. Natural mid-afternoon light, mixed warm/cool, {{shadow_intensity}} shadows, {{mood}} mood.',
         'mid-afternoon',
         'serene',
+        'mixed warm/cool',
       ],
       [
         'L8m',
@@ -185,6 +208,7 @@ export const LOCATION_BLOCKS: Block[] = [
         'The lobby of a luxury hotel in the evening. Background: marble columns, dark wood paneling, large chandelier softly glowing, hint of bar with backlit bottles, leather seating in deep shadow. Lighting: warm tungsten ambient, strong directional warm light from above-left (chandelier or sconce), shadows fall to shadow side, {{mood}} low-key. Strong contrast, {{shadow_intensity}} shadows.',
         'evening',
         'moody',
+        'warm tungsten ~3200K',
       ],
       [
         'L9m',
@@ -193,6 +217,7 @@ export const LOCATION_BLOCKS: Block[] = [
         'A city street with classic European or New York architecture. Background: facades of buildings in soft focus, blurred pedestrians, hint of café awning, parked cars far behind. Lighting: open shade between buildings (soft directional from above-right), neutral daylight, {{shadow_intensity}} shadows, cool overall, {{mood}} mood. No direct sun on subject area.',
         'mid-day',
         'urban cool',
+        'neutral daylight ~5500K',
       ],
       [
         'L10m',
@@ -201,6 +226,7 @@ export const LOCATION_BLOCKS: Block[] = [
         "A farmer's market or weekend artisan setting. Background: wooden produce crates with flowers and fruit, blurred awnings, warm rustic textures, other people softly in distance. Lighting: morning sun (warm) filtered through awnings, soft golden quality, gentle directional light from camera-left, {{shadow_intensity}} warm shadows, {{mood}} mood.",
         'morning',
         'warm artisan',
+        'mixed warm/cool',
       ],
       [
         'L11m',
@@ -209,6 +235,7 @@ export const LOCATION_BLOCKS: Block[] = [
         'Among vineyard rows in late afternoon. Background: parallel rows of grape vines stretching to soft hills, warm rolling landscape, hint of stone farmhouse or cypress trees in distance, golden vegetation. Lighting: late afternoon warm sun, low angle backlight giving rim on hair and shoulder, long warm {{shadow_intensity}} shadows, atmospheric haze softening distant hills, {{mood}} mood.',
         'late afternoon',
         'romantic',
+        'warm tungsten ~3200K',
       ],
       [
         'L12m',
@@ -217,14 +244,16 @@ export const LOCATION_BLOCKS: Block[] = [
         'An outdoor garden party setting. Background: soft-focus garden — flowering hedges, hint of round tables with white linen and floral centerpieces in deep blur, warm string lights barely visible in background bokeh, lush green and white palette. Lighting: bright open shade (cloud cover or shaded by trees) — soft, even, flattering, {{shadow_intensity}} shadows. Slight warm bounce from surroundings, {{mood}} mood.',
         'late afternoon',
         'celebratory soft',
+        'neutral daylight ~5500K',
       ],
-    ] as Array<[string, string, string, string, string, string]>
-  ).map(([id, name, name_ru, template, defaultTime, defaultMood]): Block => ({
+    ] as Array<[string, string, string, string, string, string, string]>
+  ).map(([id, name, name_ru, template, defaultTime, defaultMood, defaultColorTemp]): Block => ({
     type: 'LOCATION',
     id,
     name,
     name_ru,
     template,
+    ...(LOCATION_PROSE[id] ? { prose_template: LOCATION_PROSE[id] } : {}),
     slots: [
       {
         id: 'time_of_day',
@@ -288,7 +317,7 @@ export const LOCATION_BLOCKS: Block[] = [
           { value: 'neutral daylight ~5500K', label: 'Daylight neutral', label_ru: 'Дневной нейтральный' },
           { value: 'cool daylight ~6000K', label: 'Daylight cool', label_ru: 'Дневной холодный' },
         ],
-        default: 'neutral daylight ~5500K',
+        default: defaultColorTemp,
       },
     ],
     tags: { compatible_with: ['lifestyle_base'], incompatible_with: ['catalog_base', 'ugc_base'] },
