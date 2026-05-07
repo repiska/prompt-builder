@@ -4,6 +4,7 @@ import { BUILTIN_RECIPES, findRecipe } from '../data/recipes'
 import {
   type BlockType,
   type GenerationType,
+  type MediaType,
   type Recipe,
   type RecipeBlockRef,
   type SlotValues,
@@ -25,6 +26,7 @@ interface PersistedState {
   mode: Mode
   expertOpen: Record<string, boolean>
   lang: Lang
+  mediaType: MediaType
 }
 
 interface EditorState extends PersistedState {
@@ -34,6 +36,7 @@ interface EditorState extends PersistedState {
   setRecipeId: (id: string) => void
   setMode: (m: Mode) => void
   setLang: (l: Lang) => void
+  setMediaType: (mt: MediaType) => void
   toggleExpert: (key: string) => void
   setBlockId: (type: BlockType, id: string) => void
   removeBlock: (type: BlockType) => void
@@ -121,8 +124,8 @@ function loadCustomRecipes(): Recipe[] {
 }
 
 function stripCustom(state: EditorState): PersistedState {
-  const { generation, useCase, recipeId, recipe, mode, expertOpen, lang } = state
-  return { generation, useCase, recipeId, recipe, mode, expertOpen, lang }
+  const { generation, useCase, recipeId, recipe, mode, expertOpen, lang, mediaType } = state
+  return { generation, useCase, recipeId, recipe, mode, expertOpen, lang, mediaType }
 }
 
 function persistState(s: PersistedState) {
@@ -161,9 +164,13 @@ const initial: PersistedState = persisted ?? {
   mode: 'recipe',
   expertOpen: {},
   lang: detectInitialLang(),
+  mediaType: 'photo',
 }
 if (!persisted?.lang) {
   initial.lang = persisted?.lang ?? detectInitialLang()
+}
+if (!persisted?.mediaType) {
+  initial.mediaType = 'photo'
 }
 
 export const useEditor = create<EditorState>((set, get) => ({
@@ -192,6 +199,11 @@ export const useEditor = create<EditorState>((set, get) => ({
 
   setLang: (l) => {
     set({ lang: l })
+    persistState(stripCustom(get()))
+  },
+
+  setMediaType: (mt) => {
+    set({ mediaType: mt })
     persistState(stripCustom(get()))
   },
 
@@ -328,6 +340,7 @@ export const useEditor = create<EditorState>((set, get) => ({
       mode: 'recipe',
       expertOpen: {},
       lang: get().lang,
+      mediaType: 'photo',
     }
     set({ ...next })
     persistState(next)

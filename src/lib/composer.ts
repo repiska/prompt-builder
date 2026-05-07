@@ -431,7 +431,7 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
 
   // ── Assemble final prompt ──────────────────────────────────────────────────
   // Join with single spaces, strip duplicate periods (e.g. "sentence.. Next")
-  let prompt = sentences
+  const prompt = sentences
     .filter(Boolean)
     .join(' ')
     .replace(/\.\.+/g, '.')

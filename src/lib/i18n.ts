@@ -127,6 +127,25 @@ const DICT: Dict = {
 
   // Header
   'header.lang': { en: 'Language', ru: 'Язык' },
+
+  // Media type toggle
+  'media.photo': { en: 'Photo', ru: 'Фото' },
+  'media.video': { en: 'Video', ru: 'Видео' },
+
+  // Video mode panel
+  'video.modeTitle': { en: 'Veo 3.1 — Catalog video (MVP)', ru: 'Veo 3.1 — Каталожное видео (MVP)' },
+  'video.composedPrompt': { en: 'Composed prompt', ru: 'Готовый промпт' },
+  'video.negativePrompt': { en: 'Negative prompt', ru: 'Негативный промпт' },
+  'video.apiParams': { en: 'API parameters', ru: 'Параметры API' },
+  'video.warnings': { en: 'Warnings', ru: 'Предупреждения' },
+  'video.copy': { en: 'Copy', ru: 'Скопировать' },
+  'video.copied': { en: 'Copied', ru: 'Скопировано' },
+  'video.recipeDuration': { en: 'Duration', ru: 'Длительность' },
+  'video.recipeAspect': { en: 'Aspect ratio', ru: 'Соотношение сторон' },
+  'video.recipeResolution': { en: 'Resolution', ru: 'Разрешение' },
+  'video.recipeTier': { en: 'Tier', ru: 'Тир' },
+  'video.recipeRefCount': { en: 'Reference images', ru: 'Референс-изображения' },
+  'video.recipeNotFound': { en: 'Recipe not found.', ru: 'Рецепт не найден.' },
 }
 
 export function t(lang: Lang, key: string, params?: Record<string, string>): string {

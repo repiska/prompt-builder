@@ -3,9 +3,11 @@ import { useEditor } from './store/editor'
 import { LeftPanel } from './components/LeftPanel'
 import { CenterPanel } from './components/CenterPanel'
 import { RightPanel } from './components/RightPanel'
+import { VideoModePanel } from './components/VideoModePanel'
 import { composeAuto } from './lib/composer'
 import { validate } from './lib/validate'
 import { t, type Lang } from './lib/i18n'
+import type { MediaType } from './lib/types'
 
 type Tab = 'setup' | 'blocks' | 'prompt'
 
@@ -13,6 +15,7 @@ function App() {
   const recipe = useEditor((s) => s.recipe)
   const generation = useEditor((s) => s.generation)
   const lang = useEditor((s) => s.lang)
+  const mediaType = useEditor((s) => s.mediaType)
 
   const composed = useMemo(() => composeAuto(recipe), [recipe])
   const issues = useMemo(() => validate({ generation, recipe }), [generation, recipe])
@@ -22,44 +25,53 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="flex-1 min-h-0 hidden lg:grid grid-cols-[280px_minmax(0,1fr)_minmax(0,1fr)] gap-4 px-5 py-4">
-        <aside className="overflow-auto pr-1">
-          <LeftPanel issues={issues} />
-        </aside>
-        <main className="overflow-auto pr-1">
-          <CenterPanel />
-        </main>
-        <section className="overflow-hidden flex flex-col">
-          <RightPanel composed={composed} issues={issues} />
-        </section>
-      </div>
 
-      <div className="lg:hidden flex flex-col flex-1 min-h-0">
-        <nav className="flex border-b border-ink-700 bg-ink-800">
-          {([
-            { id: 'setup' as Tab, key: 'tab.setup' },
-            { id: 'blocks' as Tab, key: 'tab.blocks' },
-            { id: 'prompt' as Tab, key: 'tab.prompt' },
-          ]).map((tt) => (
-            <button
-              key={tt.id}
-              type="button"
-              onClick={() => setTab(tt.id)}
-              className={
-                'flex-1 py-3 text-sm font-medium border-b-2 transition-colors ' +
-                (tab === tt.id ? 'border-accent-500 text-white' : 'border-transparent text-ink-300')
-              }
-            >
-              {t(lang, tt.key)}
-            </button>
-          ))}
-        </nav>
-        <div className="flex-1 min-h-0 overflow-auto p-4">
-          {tab === 'setup' && <LeftPanel issues={issues} />}
-          {tab === 'blocks' && <CenterPanel />}
-          {tab === 'prompt' && <RightPanel composed={composed} issues={issues} />}
+      {mediaType === 'video' ? (
+        <div className="flex-1 overflow-auto">
+          <VideoModePanel lang={lang} />
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="flex-1 min-h-0 hidden lg:grid grid-cols-[280px_minmax(0,1fr)_minmax(0,1fr)] gap-4 px-5 py-4">
+            <aside className="overflow-auto pr-1">
+              <LeftPanel issues={issues} />
+            </aside>
+            <main className="overflow-auto pr-1">
+              <CenterPanel />
+            </main>
+            <section className="overflow-hidden flex flex-col">
+              <RightPanel composed={composed} issues={issues} />
+            </section>
+          </div>
+
+          <div className="lg:hidden flex flex-col flex-1 min-h-0">
+            <nav className="flex border-b border-ink-700 bg-ink-800">
+              {([
+                { id: 'setup' as Tab, key: 'tab.setup' },
+                { id: 'blocks' as Tab, key: 'tab.blocks' },
+                { id: 'prompt' as Tab, key: 'tab.prompt' },
+              ]).map((tt) => (
+                <button
+                  key={tt.id}
+                  type="button"
+                  onClick={() => setTab(tt.id)}
+                  className={
+                    'flex-1 py-3 text-sm font-medium border-b-2 transition-colors ' +
+                    (tab === tt.id ? 'border-accent-500 text-white' : 'border-transparent text-ink-300')
+                  }
+                >
+                  {t(lang, tt.key)}
+                </button>
+              ))}
+            </nav>
+            <div className="flex-1 min-h-0 overflow-auto p-4">
+              {tab === 'setup' && <LeftPanel issues={issues} />}
+              {tab === 'blocks' && <CenterPanel />}
+              {tab === 'prompt' && <RightPanel composed={composed} issues={issues} />}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -67,6 +79,8 @@ function App() {
 function Header() {
   const lang = useEditor((s) => s.lang)
   const setLang = useEditor((s) => s.setLang)
+  const mediaType = useEditor((s) => s.mediaType)
+  const setMediaType = useEditor((s) => s.setMediaType)
   return (
     <header className="border-b border-ink-700 bg-ink-800/80 backdrop-blur sticky top-0 z-10">
       <div className="px-5 py-3 flex items-center justify-between gap-4">
@@ -77,9 +91,49 @@ function Header() {
             <p className="text-[11px] text-ink-400 truncate">{t(lang, 'app.subtitle')}</p>
           </div>
         </div>
-        <LangSwitcher lang={lang} onChange={setLang} />
+        <div className="flex items-center gap-3">
+          <MediaToggle lang={lang} mediaType={mediaType} onChange={setMediaType} />
+          <LangSwitcher lang={lang} onChange={setLang} />
+        </div>
       </div>
     </header>
+  )
+}
+
+function MediaToggle({
+  lang,
+  mediaType,
+  onChange,
+}: {
+  lang: Lang
+  mediaType: MediaType
+  onChange: (mt: MediaType) => void
+}) {
+  return (
+    <div
+      className="flex p-0.5 bg-ink-700 rounded-md text-xs"
+      role="tablist"
+      aria-label="Media type"
+    >
+      {(['photo', 'video'] as const).map((mt) => {
+        const active = mediaType === mt
+        return (
+          <button
+            key={mt}
+            type="button"
+            onClick={() => onChange(mt)}
+            className={
+              'px-2.5 py-1 rounded font-medium transition-colors ' +
+              (active ? 'bg-accent-500 text-white' : 'text-ink-300 hover:text-white')
+            }
+            aria-selected={active}
+            role="tab"
+          >
+            {t(lang, mt === 'photo' ? 'media.photo' : 'media.video')}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
