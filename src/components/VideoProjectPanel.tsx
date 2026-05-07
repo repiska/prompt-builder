@@ -583,6 +583,27 @@ export function VideoProjectPanel({ lang }: Props) {
                     ))}
                   </ul>
                 )}
+
+                {/* Per-clip voiceover hint — only in native_per_clip mode */}
+                {cp.voiceoverHint && videoProject.audioStrategy === 'native_per_clip' && (
+                  <div className="border border-warn/40 bg-warn/10 rounded p-2.5 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-warn">
+                        {t(lang, 'video.voiceoverHint')}
+                      </span>
+                      <CopyButton text={cp.voiceoverHint.text} lang={lang} />
+                    </div>
+                    <pre className="text-[11px] font-mono text-ink-200 whitespace-pre-wrap break-words leading-relaxed bg-ink-900 rounded p-2">
+                      {cp.voiceoverHint.text}
+                    </pre>
+                    {cp.voiceoverHint.suggestedVoice && (
+                      <p className="text-[11px] text-ink-400">
+                        {t(lang, 'video.voiceoverHintSuggestedVoice')}:{' '}
+                        <span className="text-ink-200 font-medium">{cp.voiceoverHint.suggestedVoice}</span>
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             )
           })}

@@ -56,6 +56,19 @@ export interface ComposeVideoOutput {
     referenceImagesCount: number
   }
   warnings: string[]
+  /**
+   * Present only when the dialogue contains Cyrillic characters.
+   * Signals that the clip should be generated silent and the line
+   * overlaid via ElevenLabs voiceover (Veo 3.1 does not reliably
+   * produce Russian lip-sync).
+   */
+  voiceoverHint?: VoiceoverScript
+}
+
+/** Returns true if any character in the string is in the Cyrillic Unicode range. */
+export function hasCyrillic(s: string | undefined | null): boolean {
+  if (!s) return false
+  return /[Ѐ-ӿ]/.test(s)
 }
 
 export interface ComposedPrompt {
@@ -495,6 +508,19 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
   const negParts = [negativePrompt?.trim(), VEO_DEFAULT_NEGATIVE].filter(Boolean)
   const finalNegative = negParts.join(', ')
 
+  // ── Cyrillic dialogue detection → voiceover hint ──────────────────────────
+  let voiceoverHint: VoiceoverScript | undefined
+  if (dialogue && hasCyrillic(dialogue.line)) {
+    warnings.push(
+      "Dialogue contains Cyrillic characters — Veo 3.1 may not produce reliable Russian lip-sync. Consider 'silent + ElevenLabs voiceover' workflow.",
+    )
+    voiceoverHint = {
+      lang: 'ru',
+      text: dialogue.line,
+      suggestedVoice: 'ivan',
+    }
+  }
+
   return {
     prompt,
     negativePrompt: finalNegative,
@@ -506,6 +532,7 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
       referenceImagesCount: effectiveRefs.length,
     },
     warnings,
+    voiceoverHint,
   }
 }
 
@@ -544,6 +571,8 @@ export interface ComposeProjectOutput {
     negativePrompt: string
     apiParams: ComposeVideoOutput['apiParams']
     warnings: string[]
+    /** Only set when this clip's dialogue had Cyrillic AND audioStrategy === 'native_per_clip'. */
+    voiceoverHint?: VoiceoverScript
   }>
   /** Continuity checklist — what the user should verify before stitching. */
   continuityChecklist: string[]
@@ -699,6 +728,11 @@ export function composeVideoProject(input: ComposeProjectInput): ComposeProjectO
       slotValues: resolvedClip.slotValues,
     })
 
+    // Propagate voiceover hint only for native_per_clip — in silent mode the
+    // project-level voiceoverScript already covers the overlay workflow.
+    const clipVoiceoverHint =
+      project.audioStrategy === 'native_per_clip' ? result.voiceoverHint : undefined
+
     clipPrompts.push({
       clipId: clip.id,
       clipRole: clip.clipRole,
@@ -706,6 +740,7 @@ export function composeVideoProject(input: ComposeProjectInput): ComposeProjectO
       negativePrompt: result.negativePrompt,
       apiParams: result.apiParams,
       warnings: result.warnings,
+      voiceoverHint: clipVoiceoverHint,
     })
   }
 

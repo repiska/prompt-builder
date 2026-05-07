@@ -215,6 +215,31 @@ export function VideoModePanel({ lang }: Props) {
                   </ul>
                 </div>
               )}
+
+              {/* Voiceover hint — shown when dialogue contains Cyrillic */}
+              {output.voiceoverHint && (
+                <div className="card border-warn/40 bg-warn/10">
+                  <div className="label text-warn mb-1">
+                    {t(lang, 'video.voiceoverHint')}
+                  </div>
+                  <p className="text-[11px] text-warn/80 mb-3 leading-relaxed">
+                    {t(lang, 'video.voiceoverHintHelp')}
+                  </p>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] text-ink-400">{t(lang, 'video.voiceoverText')}</span>
+                    <CopyButton text={output.voiceoverHint.text} lang={lang} />
+                  </div>
+                  <pre className="text-xs font-mono text-ink-100 whitespace-pre-wrap break-words leading-relaxed bg-ink-900 rounded p-3 mb-2">
+                    {output.voiceoverHint.text}
+                  </pre>
+                  {output.voiceoverHint.suggestedVoice && (
+                    <p className="text-[11px] text-ink-400">
+                      {t(lang, 'video.voiceoverHintSuggestedVoice')}:{' '}
+                      <span className="text-ink-200 font-medium">{output.voiceoverHint.suggestedVoice}</span>
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             <div className="card text-xs text-ink-400">{t(lang, 'video.recipeNotFound')}</div>

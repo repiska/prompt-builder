@@ -280,6 +280,14 @@ const DICT: Dict = {
   'video.addFirstClip': { en: 'Add your first clip', ru: 'Добавить первый клип' },
   'video.noClipsYet': { en: 'No clips yet.', ru: 'Клипов пока нет.' },
 
+  // Voiceover hint (single-clip Cyrillic detection)
+  'video.voiceoverHint': { en: 'Voiceover hint', ru: 'Подсказка для озвучки' },
+  'video.voiceoverHintHelp': {
+    en: "This dialogue contains Russian. Veo doesn't reliably lip-sync Cyrillic — generate silent and overlay this script via ElevenLabs in CapCut.",
+    ru: 'Диалог на русском. Veo плохо синхронизирует губы по-русски — сгенерируйте без звука и наложите озвучку через ElevenLabs в CapCut.',
+  },
+  'video.voiceoverHintSuggestedVoice': { en: 'Suggested voice', ru: 'Рекомендуемый голос' },
+
   // Project output
   'video.composedClipPrompts': { en: 'Composed clip prompts', ru: 'Готовые промпты клипов' },
   'video.continuityChecklist': { en: 'Continuity checklist', ru: 'Чеклист continuity' },
