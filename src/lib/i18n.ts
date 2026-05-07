@@ -146,6 +146,147 @@ const DICT: Dict = {
   'video.recipeTier': { en: 'Tier', ru: 'Тир' },
   'video.recipeRefCount': { en: 'Reference images', ru: 'Референс-изображения' },
   'video.recipeNotFound': { en: 'Recipe not found.', ru: 'Рецепт не найден.' },
+
+  // Video sub-tabs
+  'video.subtabSingleClip': { en: 'Single clip', ru: 'Один клип' },
+  'video.subtabProject': { en: 'Project', ru: 'Проект' },
+
+  // Project meta
+  'video.projectName': { en: 'Project name', ru: 'Название проекта' },
+  'video.projectNamePlaceholder': { en: 'Untitled project', ru: 'Без названия' },
+
+  // Shared references
+  'video.sharedReferences': { en: 'Reference images', ru: 'Опорные изображения' },
+  'video.sharedReferencesHelp': {
+    en: 'Up to 3 reference images. JPG / PNG only. Veo 3.1 will preserve their identity across all clips.',
+    ru: 'До 3 опорных изображений. Только JPG / PNG. Veo 3.1 сохранит их облик во всех клипах.',
+  },
+  'video.referenceFormatError': {
+    en: 'JPG or PNG only. WebP/HEIC not supported by Veo 3.1.',
+    ru: 'Только JPG или PNG. WebP/HEIC не поддерживаются Veo 3.1.',
+  },
+  'video.referenceTooLargeError': {
+    en: 'File exceeds 5 MB limit.',
+    ru: 'Файл превышает ограничение в 5 МБ.',
+  },
+  'video.referenceRoleModel': { en: 'Model', ru: 'Модель' },
+  'video.referenceRoleGarment': { en: 'Garment', ru: 'Одежда' },
+  'video.referenceRoleLocation': { en: 'Location', ru: 'Локация' },
+  'video.referenceDescriptionPlaceholderModel': {
+    en: 'the woman in the reference image',
+    ru: 'девушка на опорном изображении',
+  },
+  'video.referenceDescriptionPlaceholderGarment': {
+    en: 'the beige trench coat in the reference image',
+    ru: 'бежевый тренч на опорном изображении',
+  },
+  'video.referenceDescriptionPlaceholderLocation': {
+    en: 'a sunlit Parisian café terrace at golden hour',
+    ru: 'солнечная парижская терраса в час золотого света',
+  },
+  'video.referenceUpload': { en: 'Choose image', ru: 'Выбрать изображение' },
+  'video.referenceRemove': { en: 'Remove', ru: 'Удалить' },
+
+  // Shared identity
+  'video.sharedIdentity': { en: 'Identity descriptor', ru: 'Описание персонажа' },
+  'video.sharedIdentityPlaceholder': {
+    en: 'Same female protagonist, mid-20s, shoulder-length brown hair, oversized beige blazer.',
+    ru: 'Одна и та же героиня, ~25 лет, каре-русые волосы до плеч, оверсайз-пиджак цвета беж.',
+  },
+  'video.sharedIdentityHelp': {
+    en: 'Repeated verbatim in every clip prompt to anchor the subject. Exact phrasing reduces drift.',
+    ru: 'Дословно вставляется в промпт каждого клипа — фиксирует персонажа и снижает дрейф.',
+  },
+
+  // Continuity lock
+  'video.continuityLock': { en: 'Continuity lock', ru: 'Continuity (фиксация деталей)' },
+  'video.continuityHelp': {
+    en: 'Injected into every clip prompt for cross-clip consistency.',
+    ru: 'Добавляется в каждый клип для единообразия монтажа.',
+  },
+  'video.continuityWardrobe': { en: 'Wardrobe', ru: 'Гардероб' },
+  'video.continuityWardrobePlaceholder': {
+    en: 'beige trench, white tee, straight-leg jeans',
+    ru: 'бежевый тренч, белая футболка, прямые джинсы',
+  },
+  'video.continuityLens': { en: 'Lens', ru: 'Объектив' },
+  'video.continuityLensPlaceholder': { en: '35mm equivalent', ru: '35 мм эквивалент' },
+  'video.continuityGrade': { en: 'Grade', ru: 'Грейд' },
+  'video.continuityGradePlaceholder': {
+    en: 'warm filmic, soft contrast',
+    ru: 'тёплое кино, мягкий контраст',
+  },
+  'video.continuityLighting': { en: 'Lighting', ru: 'Свет' },
+  'video.continuityLightingPlaceholder': {
+    en: 'soft window light, no studio fixtures',
+    ru: 'мягкий оконный свет, без студийных приборов',
+  },
+  'video.continuityTimeOfDay': { en: 'Time of day', ru: 'Время суток' },
+  'video.continuityTimeOfDayPlaceholder': {
+    en: 'late afternoon golden hour',
+    ru: 'послеполуденный золотой час',
+  },
+
+  // Seed
+  'video.seed': { en: 'Shared seed', ru: 'Общий seed' },
+  'video.seedHelp': {
+    en: 'Optional fixed seed. Same seed across clips improves identity consistency.',
+    ru: 'Необязательный фиксированный seed. Одинаковый seed улучшает единообразие персонажа.',
+  },
+  'video.seedPlaceholder': { en: 'e.g. 42', ru: 'напр. 42' },
+
+  // Audio strategy
+  'video.audioStrategy': { en: 'Audio strategy', ru: 'Стратегия аудио' },
+  'video.audioStrategySilent': { en: 'Silent + voiceover overlay', ru: 'Тишина + voiceover' },
+  'video.audioStrategySilentHelp': {
+    en: 'Recommended for multi-clip. Generate clips silent, then overlay ElevenLabs voiceover in CapCut.',
+    ru: 'Рекомендуется для мульти-клипов. Генерируйте без звука, затем накладывайте голос ElevenLabs в CapCut.',
+  },
+  'video.audioStrategyNative': { en: 'Native audio per clip', ru: 'Нативный звук на клип' },
+  'video.audioStrategyNativeHelp': {
+    en: 'Each clip generates its own Veo audio. Transitions may sound jarring when stitched.',
+    ru: 'Каждый клип генерирует свой звук Veo. При склейке переходы могут звучать резко.',
+  },
+
+  // Voiceover script
+  'video.voiceoverScript': { en: 'Voiceover script', ru: 'Скрипт голоса' },
+  'video.voiceoverLang': { en: 'Script language', ru: 'Язык скрипта' },
+  'video.voiceoverVoice': { en: 'Voice preset', ru: 'Голосовой пресет' },
+  'video.voiceoverText': { en: 'Script text', ru: 'Текст скрипта' },
+  'video.voiceoverScriptPlaceholderEn': {
+    en: 'Paste the script you will record or generate with ElevenLabs...',
+    ru: 'Вставьте скрипт для записи или генерации в ElevenLabs...',
+  },
+  'video.voiceoverScriptPlaceholderRu': {
+    en: 'Вставьте текст для озвучки...',
+    ru: 'Вставьте текст для озвучки...',
+  },
+  'video.voiceoverHelp': {
+    en: 'Paste this script into ElevenLabs (or equivalent) and overlay the audio in CapCut after generating clips.',
+    ru: 'Вставьте скрипт в ElevenLabs (или аналог) и наложите аудио в CapCut после генерации клипов.',
+  },
+
+  // Clips
+  'video.clips': { en: 'Clips', ru: 'Клипы' },
+  'video.addClip': { en: 'Add clip', ru: 'Добавить клип' },
+  'video.clipRole.hook': { en: 'Hook', ru: 'Хук' },
+  'video.clipRole.demo': { en: 'Demo', ru: 'Демо' },
+  'video.clipRole.reaction': { en: 'Reaction', ru: 'Реакция' },
+  'video.clipRole.cta': { en: 'CTA', ru: 'CTA' },
+  'video.clipRole.b_roll': { en: 'B-roll', ru: 'B-roll' },
+  'video.recipe': { en: 'Recipe', ru: 'Рецепт' },
+  'video.noRecipeSelected': { en: 'No recipe selected', ru: 'Рецепт не выбран' },
+  'video.removeClip': { en: 'Remove clip', ru: 'Удалить клип' },
+  'video.addFirstClip': { en: 'Add your first clip', ru: 'Добавить первый клип' },
+  'video.noClipsYet': { en: 'No clips yet.', ru: 'Клипов пока нет.' },
+
+  // Project output
+  'video.composedClipPrompts': { en: 'Composed clip prompts', ru: 'Готовые промпты клипов' },
+  'video.continuityChecklist': { en: 'Continuity checklist', ru: 'Чеклист continuity' },
+  'video.projectWarnings': { en: 'Project warnings', ru: 'Предупреждения проекта' },
+  'video.copyAll': { en: 'Copy all', ru: 'Скопировать всё' },
+  'video.clipN': { en: 'Clip {n}', ru: 'Клип {n}' },
+  'video.clipRoleLabel': { en: 'Role', ru: 'Роль' },
 }
 
 export function t(lang: Lang, key: string, params?: Record<string, string>): string {

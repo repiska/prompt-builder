@@ -8,15 +8,49 @@ import {
   type Recipe,
   type RecipeBlockRef,
   type SlotValues,
+  type VideoProject,
+  type VideoProjectClip,
+  type ReferenceImageDeclaration,
   BASE_FOR_GEN,
   REQUIRED_BLOCKS_BY_GEN,
 } from '../lib/types'
 import type { Lang } from '../lib/i18n'
 
 type Mode = 'recipe' | 'block' | 'expert'
+type VideoMode = 'single_clip' | 'project'
 
 const STORAGE_KEY_STATE = 'pb.state.v1'
 const STORAGE_KEY_CUSTOM = 'pb.custom_recipes.v1'
+
+/** Slot data for one uploaded reference image. Null means no image for that slot. */
+export interface ReferenceImageData {
+  index: number
+  dataUrl: string
+  mimeType: string
+  sizeBytes: number
+  fileName: string
+}
+
+function buildDefaultProject(): VideoProject {
+  return {
+    id: 'default-project',
+    name: 'Untitled project',
+    sharedReferences: [],
+    sharedIdentityDescriptor: '',
+    sharedSeed: undefined,
+    continuityLock: {},
+    audioStrategy: 'silent_for_voiceover_overlay',
+    voiceoverScript: { lang: 'en', text: '', suggestedVoice: 'default' },
+    clips: [
+      { id: 'c1', recipeId: 'VR_PDP_LOOP', clipRole: 'hook' },
+    ],
+    defaultAspectRatio: '9:16',
+    defaultResolution: '1080p',
+    defaultTier: 'generate',
+  }
+}
+
+const DEFAULT_REFERENCE_IMAGES: ReferenceImageData[] = []
 
 interface PersistedState {
   generation: GenerationType
@@ -27,6 +61,9 @@ interface PersistedState {
   expertOpen: Record<string, boolean>
   lang: Lang
   mediaType: MediaType
+  videoMode: VideoMode
+  videoProject: VideoProject
+  videoProjectReferenceImages: ReferenceImageData[]
 }
 
 interface EditorState extends PersistedState {
@@ -48,6 +85,16 @@ interface EditorState extends PersistedState {
   importRecipe: (raw: string) => Recipe | null
   exportRecipe: () => string
   reset: () => void
+  // Video project actions
+  setVideoMode: (mode: VideoMode) => void
+  updateVideoProject: (patch: Partial<VideoProject>) => void
+  addProjectClip: (recipeId: string) => void
+  removeProjectClip: (clipId: string) => void
+  updateProjectClip: (clipId: string, patch: Partial<VideoProjectClip>) => void
+  addProjectReference: (ref: ReferenceImageDeclaration) => void
+  removeProjectReference: (index: number) => void
+  updateProjectReference: (index: number, patch: Partial<ReferenceImageDeclaration>) => void
+  setProjectReferenceImage: (index: number, payload: Omit<ReferenceImageData, 'index'> | null) => void
 }
 
 function pickFirstAvailableForBase(type: BlockType, base: string): string | undefined {
@@ -124,8 +171,14 @@ function loadCustomRecipes(): Recipe[] {
 }
 
 function stripCustom(state: EditorState): PersistedState {
-  const { generation, useCase, recipeId, recipe, mode, expertOpen, lang, mediaType } = state
-  return { generation, useCase, recipeId, recipe, mode, expertOpen, lang, mediaType }
+  const {
+    generation, useCase, recipeId, recipe, mode, expertOpen, lang, mediaType,
+    videoMode, videoProject, videoProjectReferenceImages,
+  } = state
+  return {
+    generation, useCase, recipeId, recipe, mode, expertOpen, lang, mediaType,
+    videoMode, videoProject, videoProjectReferenceImages,
+  }
 }
 
 function persistState(s: PersistedState) {
@@ -165,12 +218,30 @@ const initial: PersistedState = persisted ?? {
   expertOpen: {},
   lang: detectInitialLang(),
   mediaType: 'photo',
+  videoMode: 'single_clip',
+  videoProject: buildDefaultProject(),
+  videoProjectReferenceImages: DEFAULT_REFERENCE_IMAGES,
 }
 if (!persisted?.lang) {
   initial.lang = persisted?.lang ?? detectInitialLang()
 }
 if (!persisted?.mediaType) {
   initial.mediaType = 'photo'
+}
+// Migration: add videoMode / videoProject / videoProjectReferenceImages if missing from persisted state
+if (!initial.videoMode) {
+  initial.videoMode = 'single_clip'
+}
+if (!initial.videoProject) {
+  initial.videoProject = buildDefaultProject()
+}
+if (!initial.videoProjectReferenceImages) {
+  initial.videoProjectReferenceImages = DEFAULT_REFERENCE_IMAGES
+} else {
+  // Migration: old persisted state may have been a 3-slot nullable tuple — compact to dense array
+  initial.videoProjectReferenceImages = (initial.videoProjectReferenceImages as (ReferenceImageData | null)[]).filter(
+    (img): img is ReferenceImageData => img !== null
+  )
 }
 
 export const useEditor = create<EditorState>((set, get) => ({
@@ -341,8 +412,117 @@ export const useEditor = create<EditorState>((set, get) => ({
       expertOpen: {},
       lang: get().lang,
       mediaType: 'photo',
+      videoMode: 'single_clip',
+      videoProject: buildDefaultProject(),
+      videoProjectReferenceImages: DEFAULT_REFERENCE_IMAGES,
     }
     set({ ...next })
     persistState(next)
+  },
+
+  // ── Video project actions ──────────────────────────────────────────────────
+
+  setVideoMode: (mode) => {
+    set({ videoMode: mode })
+    persistState(stripCustom(get()))
+  },
+
+  updateVideoProject: (patch) => {
+    const next = { ...get().videoProject, ...patch }
+    set({ videoProject: next })
+    persistState(stripCustom({ ...get(), videoProject: next }))
+  },
+
+  addProjectClip: (recipeId) => {
+    const clips = get().videoProject.clips
+    // Generate next id: find max numeric suffix and increment
+    const maxN = clips.reduce((max, c) => {
+      const m = c.id.match(/^c(\d+)$/)
+      return m ? Math.max(max, parseInt(m[1], 10)) : max
+    }, 0)
+    const newClip: VideoProjectClip = {
+      id: `c${maxN + 1}`,
+      recipeId,
+      clipRole: 'demo',
+    }
+    const next: VideoProject = { ...get().videoProject, clips: [...clips, newClip] }
+    set({ videoProject: next })
+    persistState(stripCustom({ ...get(), videoProject: next }))
+  },
+
+  removeProjectClip: (clipId) => {
+    const next: VideoProject = {
+      ...get().videoProject,
+      clips: get().videoProject.clips.filter((c) => c.id !== clipId),
+    }
+    set({ videoProject: next })
+    persistState(stripCustom({ ...get(), videoProject: next }))
+  },
+
+  updateProjectClip: (clipId, patch) => {
+    const next: VideoProject = {
+      ...get().videoProject,
+      clips: get().videoProject.clips.map((c) =>
+        c.id === clipId ? { ...c, ...patch } : c
+      ),
+    }
+    set({ videoProject: next })
+    persistState(stripCustom({ ...get(), videoProject: next }))
+  },
+
+  addProjectReference: (ref) => {
+    const refs = get().videoProject.sharedReferences
+    if (refs.length >= 3) return
+    const next: VideoProject = {
+      ...get().videoProject,
+      sharedReferences: [...refs, ref],
+    }
+    set({ videoProject: next })
+    persistState(stripCustom({ ...get(), videoProject: next }))
+  },
+
+  removeProjectReference: (index) => {
+    const refs = [...get().videoProject.sharedReferences]
+    refs.splice(index, 1)
+    const next: VideoProject = { ...get().videoProject, sharedReferences: refs }
+    // Keep images array dense and aligned: splice out the same index
+    const imgs = [...get().videoProjectReferenceImages]
+    imgs.splice(index, 1)
+    set({ videoProject: next, videoProjectReferenceImages: imgs })
+    persistState(stripCustom({ ...get(), videoProject: next, videoProjectReferenceImages: imgs }))
+  },
+
+  updateProjectReference: (index, patch) => {
+    const refs = [...get().videoProject.sharedReferences]
+    if (index < 0 || index >= refs.length) return
+    refs[index] = { ...refs[index], ...patch }
+    const next: VideoProject = { ...get().videoProject, sharedReferences: refs }
+    set({ videoProject: next })
+    persistState(stripCustom({ ...get(), videoProject: next }))
+  },
+
+  setProjectReferenceImage: (index, payload) => {
+    const imgs = [...get().videoProjectReferenceImages]
+
+    if (payload !== null) {
+      // Storage limit guard: check total encoded size across all images
+      const newEntry: ReferenceImageData = { index, ...payload }
+      const testImgs = [...imgs]
+      testImgs[index] = newEntry
+      const totalEncodedBytes = testImgs.reduce((sum, img) => sum + img.dataUrl.length, 0)
+      if (totalEncodedBytes > 4_500_000) {
+        console.warn(
+          `[editor] setProjectReferenceImage: Reference image total exceeds localStorage budget (encoded ${totalEncodedBytes} bytes > 4.5MB).`
+        )
+        return
+      }
+      imgs[index] = newEntry
+    } else {
+      // null payload: remove image and keep declaration in place (caller may follow with removeProjectReference)
+      imgs.splice(index, 1)
+    }
+
+    set({ videoProjectReferenceImages: imgs })
+    persistState(stripCustom({ ...get(), videoProjectReferenceImages: imgs }))
   },
 }))

@@ -10,6 +10,8 @@ import {
 import { composeVideoPrompt, type ComposeVideoInput } from '../lib/composer'
 import type { Lang } from '../lib/i18n'
 import { t, loc } from '../lib/i18n'
+import { useEditor } from '../store/editor'
+import { VideoProjectPanel } from './VideoProjectPanel'
 
 // ── resolver ──────────────────────────────────────────────────────────────────
 
@@ -82,6 +84,7 @@ interface Props {
 }
 
 export function VideoModePanel({ lang }: Props) {
+  const { videoMode, setVideoMode } = useEditor()
   const [selectedRecipeId, setSelectedRecipeId] = useState<string>(
     VIDEO_RECIPES[0]?.id ?? 'VR_PDP_LOOP'
   )
@@ -92,100 +95,131 @@ export function VideoModePanel({ lang }: Props) {
   }, [selectedRecipeId])
 
   return (
-    <div className="max-w-3xl mx-auto px-5 py-6 space-y-5">
-      {/* Header */}
-      <div>
-        <h2 className="text-sm font-semibold text-accent-400 uppercase tracking-wider">
-          {t(lang, 'video.modeTitle')}
-        </h2>
+    <div className="space-y-0">
+      {/* Sub-tab toggle */}
+      <div className="flex border-b border-ink-700 px-5 pt-4">
+        {(
+          [
+            ['single_clip', 'video.subtabSingleClip'],
+            ['project',     'video.subtabProject'],
+          ] as const
+        ).map(([mode, labelKey]) => (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => setVideoMode(mode)}
+            className={
+              'px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px ' +
+              (videoMode === mode
+                ? 'border-accent-500 text-accent-400'
+                : 'border-transparent text-ink-400 hover:text-ink-200')
+            }
+          >
+            {t(lang, labelKey)}
+          </button>
+        ))}
       </div>
 
-      {/* Recipe pills */}
-      <div className="flex flex-wrap gap-2">
-        {VIDEO_RECIPES.map((recipe) => {
-          const active = recipe.id === selectedRecipeId
-          return (
-            <button
-              key={recipe.id}
-              type="button"
-              onClick={() => setSelectedRecipeId(recipe.id)}
-              className={
-                'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ' +
-                (active
-                  ? 'bg-accent-500 border-accent-500 text-white'
-                  : 'bg-ink-800 border-ink-600 text-ink-300 hover:border-accent-500 hover:text-white')
-              }
-            >
-              {loc(recipe, lang, 'name')}
-            </button>
-          )
-        })}
-      </div>
-
-      {output ? (
-        <div className="space-y-4">
-          {/* Composed prompt */}
-          <div className="card">
-            <div className="flex items-center justify-between mb-2">
-              <div className="label">{t(lang, 'video.composedPrompt')}</div>
-              <CopyButton text={output.prompt} lang={lang} />
-            </div>
-            <pre className="text-xs font-mono text-ink-100 whitespace-pre-wrap break-words leading-relaxed bg-ink-900 rounded p-3">
-              {output.prompt}
-            </pre>
+      {/* Tab content */}
+      {videoMode === 'project' ? (
+        <VideoProjectPanel lang={lang} />
+      ) : (
+        <div className="max-w-3xl mx-auto px-5 py-6 space-y-5">
+          {/* Header */}
+          <div>
+            <h2 className="text-sm font-semibold text-accent-400 uppercase tracking-wider">
+              {t(lang, 'video.modeTitle')}
+            </h2>
           </div>
 
-          {/* Negative prompt */}
-          <div className="card">
-            <div className="flex items-center justify-between mb-2">
-              <div className="label">{t(lang, 'video.negativePrompt')}</div>
-              {output.negativePrompt && (
-                <CopyButton text={output.negativePrompt} lang={lang} />
+          {/* Recipe pills */}
+          <div className="flex flex-wrap gap-2">
+            {VIDEO_RECIPES.map((recipe) => {
+              const active = recipe.id === selectedRecipeId
+              return (
+                <button
+                  key={recipe.id}
+                  type="button"
+                  onClick={() => setSelectedRecipeId(recipe.id)}
+                  className={
+                    'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ' +
+                    (active
+                      ? 'bg-accent-500 border-accent-500 text-white'
+                      : 'bg-ink-800 border-ink-600 text-ink-300 hover:border-accent-500 hover:text-white')
+                  }
+                >
+                  {loc(recipe, lang, 'name')}
+                </button>
+              )
+            })}
+          </div>
+
+          {output ? (
+            <div className="space-y-4">
+              {/* Composed prompt */}
+              <div className="card">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="label">{t(lang, 'video.composedPrompt')}</div>
+                  <CopyButton text={output.prompt} lang={lang} />
+                </div>
+                <pre className="text-xs font-mono text-ink-100 whitespace-pre-wrap break-words leading-relaxed bg-ink-900 rounded p-3">
+                  {output.prompt}
+                </pre>
+              </div>
+
+              {/* Negative prompt */}
+              <div className="card">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="label">{t(lang, 'video.negativePrompt')}</div>
+                  {output.negativePrompt && (
+                    <CopyButton text={output.negativePrompt} lang={lang} />
+                  )}
+                </div>
+                <pre className="text-xs font-mono text-ink-300 whitespace-pre-wrap break-words leading-relaxed bg-ink-900 rounded p-3">
+                  {output.negativePrompt || '—'}
+                </pre>
+              </div>
+
+              {/* API parameters */}
+              <div className="card">
+                <div className="label mb-2">{t(lang, 'video.apiParams')}</div>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                  <dt className="text-ink-400">{t(lang, 'video.recipeDuration')}</dt>
+                  <dd className="text-ink-100 font-medium">{output.apiParams.durationSeconds}s</dd>
+
+                  <dt className="text-ink-400">{t(lang, 'video.recipeAspect')}</dt>
+                  <dd className="text-ink-100 font-medium">{output.apiParams.aspectRatio}</dd>
+
+                  <dt className="text-ink-400">{t(lang, 'video.recipeResolution')}</dt>
+                  <dd className="text-ink-100 font-medium">{output.apiParams.resolution}</dd>
+
+                  <dt className="text-ink-400">{t(lang, 'video.recipeTier')}</dt>
+                  <dd className="text-ink-100 font-medium">{output.apiParams.tier}</dd>
+
+                  <dt className="text-ink-400">{t(lang, 'video.recipeRefCount')}</dt>
+                  <dd className="text-ink-100 font-medium">{output.apiParams.referenceImagesCount}</dd>
+                </dl>
+              </div>
+
+              {/* Warnings */}
+              {output.warnings.length > 0 && (
+                <div className="card border-warn/40 bg-warn/10">
+                  <div className="label text-warn mb-2">{t(lang, 'video.warnings')}</div>
+                  <ul className="space-y-1">
+                    {output.warnings.map((w) => (
+                      <li key={w} className="text-xs text-warn flex gap-2">
+                        <span className="shrink-0">!</span>
+                        <span>{w}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
-            <pre className="text-xs font-mono text-ink-300 whitespace-pre-wrap break-words leading-relaxed bg-ink-900 rounded p-3">
-              {output.negativePrompt || '—'}
-            </pre>
-          </div>
-
-          {/* API parameters */}
-          <div className="card">
-            <div className="label mb-2">{t(lang, 'video.apiParams')}</div>
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-              <dt className="text-ink-400">{t(lang, 'video.recipeDuration')}</dt>
-              <dd className="text-ink-100 font-medium">{output.apiParams.durationSeconds}s</dd>
-
-              <dt className="text-ink-400">{t(lang, 'video.recipeAspect')}</dt>
-              <dd className="text-ink-100 font-medium">{output.apiParams.aspectRatio}</dd>
-
-              <dt className="text-ink-400">{t(lang, 'video.recipeResolution')}</dt>
-              <dd className="text-ink-100 font-medium">{output.apiParams.resolution}</dd>
-
-              <dt className="text-ink-400">{t(lang, 'video.recipeTier')}</dt>
-              <dd className="text-ink-100 font-medium">{output.apiParams.tier}</dd>
-
-              <dt className="text-ink-400">{t(lang, 'video.recipeRefCount')}</dt>
-              <dd className="text-ink-100 font-medium">{output.apiParams.referenceImagesCount}</dd>
-            </dl>
-          </div>
-
-          {/* Warnings */}
-          {output.warnings.length > 0 && (
-            <div className="card border-warn/40 bg-warn/10">
-              <div className="label text-warn mb-2">{t(lang, 'video.warnings')}</div>
-              <ul className="space-y-1">
-                {output.warnings.map((w) => (
-                  <li key={w} className="text-xs text-warn flex gap-2">
-                    <span className="shrink-0">!</span>
-                    <span>{w}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          ) : (
+            <div className="card text-xs text-ink-400">{t(lang, 'video.recipeNotFound')}</div>
           )}
         </div>
-      ) : (
-        <div className="card text-xs text-ink-400">{t(lang, 'video.recipeNotFound')}</div>
       )}
     </div>
   )
