@@ -1,13 +1,13 @@
 {
-  "name": "promp-builder",
+  "name": "prompt-builder",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "description": "Visual editor for AI fashion photo prompts (catalog, lifestyle, UGC) — schema-driven blocks + recipes.",
-  "homepage": "https://repiska.github.io/promp-builder/",
+  "homepage": "https://repiska.github.io/prompt-builder/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/repiska/promp-builder.git"
+    "url": "https://github.com/repiska/prompt-builder.git"
   },
   "scripts": {
     "dev": "vite",
