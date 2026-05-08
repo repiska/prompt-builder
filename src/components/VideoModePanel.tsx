@@ -51,6 +51,8 @@ function resolveRecipe(recipeId: string): ComposeVideoInput | null {
     dialogue: recipe.dialogue ?? null,
     negativePrompt: recipe.negativePrompt,
     slotValues: recipe.slotValues ?? {},
+    motionSpeed: recipe.motionSpeed,
+    materialHint: recipe.materialHint,
   }
 }
 

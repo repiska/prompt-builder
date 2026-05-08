@@ -32,6 +32,7 @@ import type {
   VeoResolution,
   VeoTier,
   ElevenLabsRuVoice,
+  MotionSpeed,
 } from '../lib/types'
 import { PROJECT_CLIP_ROLES } from '../lib/types'
 import { t, loc } from '../lib/i18n'
@@ -54,6 +55,8 @@ function resolveRecipeBlocks(recipeId: string): {
   tier: VeoTier
   slotValues: Record<string, unknown>
   negativePrompt?: string
+  motionSpeed?: MotionSpeed
+  materialHint?: string
 } | null {
   const recipe = ALL_VIDEO_RECIPES.find((r) => r.id === recipeId)
   if (!recipe) return null
@@ -91,6 +94,8 @@ function resolveRecipeBlocks(recipeId: string): {
     tier: recipe.tier ?? base.defaultTier,
     slotValues: recipe.slotValues ?? {},
     negativePrompt: recipe.negativePrompt,
+    motionSpeed: recipe.motionSpeed,
+    materialHint: recipe.materialHint,
   }
 }
 

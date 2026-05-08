@@ -19,6 +19,7 @@ import type {
   VideoProject,
   ProjectClipRole,
   VoiceoverScript,
+  MotionSpeed,
 } from './types'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -43,6 +44,10 @@ export interface ComposeVideoInput {
   dialogue: AudioDialogue | null
   negativePrompt?: string
   slotValues: SlotValues
+  /** When set, the composer injects a speed-control sentence directly before the motion sentence. */
+  motionSpeed?: MotionSpeed
+  /** When set, the composer injects a material-hint sentence directly after the motion sentence. */
+  materialHint?: string
 }
 
 export interface ComposeVideoOutput {
@@ -281,6 +286,23 @@ function wordCount(s: string): number {
   return s.trim().split(/\s+/).filter(Boolean).length
 }
 
+/** Build the speed-control sentence for a given MotionSpeed value. */
+function buildMotionSpeedSentence(speed: MotionSpeed): string {
+  switch (speed) {
+    case 'slow_cinematic':
+      return 'Cinematic pacing — slow, controlled, restrained.'
+    case 'natural_real_time':
+      return 'Real-time motion at natural speed, not slow-motion.'
+    case 'energetic':
+      return 'Energetic real-time pace, deliberate movement, not stylized slow-motion.'
+  }
+}
+
+/** Build the material-hint sentence. */
+function buildMaterialHintSentence(material: string): string {
+  return `The garment is ${material} — visible weave, natural fabric grain, no plastic sheen.`
+}
+
 /** Resolve a video block's display text: prose_template substituted with slot values, or fallback to name. */
 function resolveBlockText(block: { prose_template?: string; name: string }, slotValues: SlotValues): string {
   return block.prose_template
@@ -316,6 +338,8 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
     dialogue,
     negativePrompt,
     slotValues,
+    motionSpeed,
+    materialHint,
   } = input
 
   const warnings: string[] = []
@@ -428,10 +452,12 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
     if (gradeText) sentences.push(ensurePeriod(gradeText))
 
     // Append motion block prose if provided.
+    if (motionSpeed) sentences.push(buildMotionSpeedSentence(motionSpeed))
     if (motion) {
       const motionText = resolveBlockText(motion, slotValues)
       if (motionText) sentences.push(ensurePeriod(motionText))
     }
+    if (materialHint) sentences.push(buildMaterialHintSentence(materialHint))
   // TODO: promote to a base.mode field when more strip-modes appear
   } else if (base.id === 'VB_ANIMATE') {
     // Animate-from-photo stripped path — the reference image carries subject + context.
@@ -442,15 +468,22 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
     sentences.push(ensurePeriod(movementLabel))
 
     // 2. Action — motion block (no subject sentence, no context sentence)
+    if (motionSpeed) sentences.push(buildMotionSpeedSentence(motionSpeed))
     if (motion) {
       const motionText = resolveBlockText(motion, slotValues)
       if (motionText) sentences.push(ensurePeriod(motionText))
     }
+    if (materialHint) sentences.push(buildMaterialHintSentence(materialHint))
 
     // 3. Style & Ambiance — only if grade block provided; omit default fallback
     if (grade) {
       const gradeText = resolveBlockText(grade, slotValues)
       if (gradeText) sentences.push(ensurePeriod(gradeText))
+    }
+
+    // 3b. Realism suffix — anti-slow-motion + fabric physics anchor
+    if (base.prose_realism_suffix) {
+      sentences.push(ensurePeriod(base.prose_realism_suffix))
     }
 
     // Mandatory animate-mode sentinel — must appear before audio sentences
@@ -470,10 +503,12 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
     if (subjectText) sentences.push(ensurePeriod(subjectText))
 
     // 3. Action — verb-led, from motion block
+    if (motionSpeed) sentences.push(buildMotionSpeedSentence(motionSpeed))
     if (motion) {
       const motionText = resolveBlockText(motion, slotValues)
       if (motionText) sentences.push(ensurePeriod(motionText))
     }
+    if (materialHint) sentences.push(buildMaterialHintSentence(materialHint))
     // (If no motion block, action sentence is omitted per spec)
 
     // 4. Context — environment/time of day; sourced from prose_context when present.
@@ -486,6 +521,17 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
     // 5. Style & Ambiance — grade block
     const gradeText = grade ? resolveBlockText(grade, slotValues) : 'Natural lighting'
     if (gradeText) sentences.push(ensurePeriod(gradeText))
+
+    // 5b. Realism suffix
+    if (base.prose_realism_suffix) {
+      sentences.push(ensurePeriod(base.prose_realism_suffix))
+    }
+  }
+
+  // ── Realism suffix for spine-based path ───────────────────────────────────
+  // VB_ANIMATE appends inline above; here we cover the spine-based path.
+  if (base.prose_template && base.prose_realism_suffix) {
+    sentences.push(ensurePeriod(base.prose_realism_suffix))
   }
 
   // ── Audio section ─────────────────────────────────────────────────────────
@@ -582,6 +628,8 @@ export interface ComposeProjectInput {
     negativePrompt?: string
     /** Recipe's baseline dialogue. Used when audioStrategy is 'native_per_clip' and the clip has no dialogueOverride. */
     dialogue?: AudioDialogue | null
+    motionSpeed?: MotionSpeed
+    materialHint?: string
   }>
 }
 
@@ -749,6 +797,8 @@ export function composeVideoProject(input: ComposeProjectInput): ComposeProjectO
       dialogue: effectiveDialogue,
       negativePrompt: resolvedClip.negativePrompt,
       slotValues: resolvedClip.slotValues,
+      motionSpeed: resolvedClip.motionSpeed,
+      materialHint: resolvedClip.materialHint,
     })
 
     // Propagate voiceover hint only for native_per_clip — in silent mode the

@@ -311,6 +311,8 @@ export interface VideoBaseBlock {
   prose_subject_intro?: string
   /** Optional scene-context sentence used in the deterministic prose path (5-section order, Context slot). */
   prose_context?: string
+  /** Universal realism-anchoring sentence appended to every prose output for this base — before the audio section. Used to inject anti-slow-motion + fabric-physics phrases. */
+  prose_realism_suffix?: string
 }
 
 export interface MotionBlock {
@@ -369,6 +371,11 @@ export type VideoBlock =
   | GradeVideoBlock
   | AudioPresetBlock
 
+// ── Motion speed ─────────────────────────────────────────────────────────────
+
+export const MOTION_SPEEDS = ['slow_cinematic', 'natural_real_time', 'energetic'] as const
+export type MotionSpeed = typeof MOTION_SPEEDS[number]
+
 // ── Video recipe ──────────────────────────────────────────────────────────────
 // Mirrors the photo Recipe shape. Block references are flat id strings (not
 // RecipeBlockRef objects) because video blocks don't share the photo tag/compat
@@ -401,6 +408,11 @@ export interface VideoRecipe {
   dialogue?: AudioDialogue
   /** Unwanted elements expressed positively (Veo rejects "no X" phrasing). */
   negativePrompt?: string
+  /** When set, the composer prepends a single speed-control sentence in front of the motion sentence to bias Veo against its slow-motion default. */
+  motionSpeed?: MotionSpeed
+  /** Optional material name (e.g. "denim", "silk", "wool") — gives Veo a concrete light-reflection profile when animating fabric. */
+  materialHint?: string
+  materialHint_ru?: string
 }
 
 // ── Video editor slice (type-only) ────────────────────────────────────────────

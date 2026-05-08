@@ -23,6 +23,8 @@ export const ANIMATE_BASE_BLOCKS: VideoBaseBlock[] = [
     defaultResolution: '720p',
     defaultTier: 'fast',
     slots: [],
+    prose_realism_suffix:
+      'Weighty fabric with realistic physics — natural inertia, visible fabric weave, fabric texture catches light naturally, no plastic sheen, no over-smoothing.',
   },
 ]
 
@@ -37,7 +39,7 @@ export const ANIMATE_MOTION_BLOCKS: MotionBlock[] = [
     name_ru: 'Тонкое статичное дыхание (зацикленно)',
     loopable: true,
     prose_template:
-      'The subject stays in pose with subtle breathing motion, fabric drape settles, hair shifts a few millimeters.',
+      'The subject holds the pose with natural breathing rhythm — fabric drape settles under its own weight, hair shifts a couple of millimeters.',
   },
   {
     kind: 'MOTION',
@@ -45,7 +47,7 @@ export const ANIMATE_MOTION_BLOCKS: MotionBlock[] = [
     name: 'Slow 360° turn',
     name_ru: 'Медленный поворот на 360°',
     prose_template:
-      'The figure turns 360 degrees showing the full outfit from every angle. The turn is confident and smooth with a brief pause at the three-quarter view. Hair and fabric respond to the rotation with natural physics.',
+      'The figure performs a 360-degree turn at natural everyday speed, briefly settling at the three-quarter view. Fabric and hair respond to the rotation with weight and inertia, not stylized slow-motion.',
   },
   {
     kind: 'MOTION',
@@ -53,7 +55,7 @@ export const ANIMATE_MOTION_BLOCKS: MotionBlock[] = [
     name: 'Fabric catches breeze',
     name_ru: 'Ткань на ветру',
     prose_template:
-      "The fabric catches a gentle breeze and billows softly away from the body. Each fold creates new shadow patterns. The motion is slow and elegant, emphasizing the material's weight and drape.",
+      'The fabric is moved by a steady breeze with realistic weight — folds shift naturally, edges flutter at real-time speed, shadow patterns reform with each movement.',
   },
   {
     kind: 'MOTION',
@@ -61,7 +63,7 @@ export const ANIMATE_MOTION_BLOCKS: MotionBlock[] = [
     name: 'Slow dolly-in to detail',
     name_ru: 'Медленный наезд на деталь',
     prose_template:
-      'Slow cinematic dolly-in from a medium-wide framing to a tight close-up, shallow depth of field reveals fabric texture and stitching. The subject remains still.',
+      'Steady dolly-in from medium-wide to a tight close-up at natural pace, shallow depth of field reveals fabric weave and stitching detail. The subject remains still.',
   },
   {
     kind: 'MOTION',
@@ -69,7 +71,7 @@ export const ANIMATE_MOTION_BLOCKS: MotionBlock[] = [
     name: 'Product orbit (no model)',
     name_ru: 'Орбита продукта (без модели)',
     prose_template:
-      'The product rotates smoothly 360 degrees on its axis. Lighting remains consistent throughout the rotation. Each angle reveals a different surface detail. The rotation is slow and steady with no acceleration or deceleration.',
+      'The product rotates 360 degrees on its axis at constant real-time speed — no acceleration, no slow-motion. Lighting is consistent throughout. Each angle reveals a different surface detail.',
   },
   {
     kind: 'MOTION',
@@ -77,7 +79,7 @@ export const ANIMATE_MOTION_BLOCKS: MotionBlock[] = [
     name: 'Lateral parallax pan',
     name_ru: 'Боковая панорама с параллаксом',
     prose_template:
-      'Smooth lateral camera pan from left to right at chest height, parallax reveals depth and side profile. The subject maintains pose.',
+      'Lateral camera pan from left to right at chest height, real-time pacing, parallax reveals depth and side profile. The subject maintains pose.',
   },
 ]
 
@@ -96,6 +98,7 @@ export const ANIMATE_RECIPES: VideoRecipe[] = [
     aspectRatio: '9:16',
     resolution: '720p',
     tier: 'fast',
+    motionSpeed: 'natural_real_time',
   },
   {
     id: 'VR_ANIMATE_360_HERO',
@@ -109,6 +112,7 @@ export const ANIMATE_RECIPES: VideoRecipe[] = [
     aspectRatio: '9:16',
     resolution: '1080p',
     tier: 'generate',
+    motionSpeed: 'natural_real_time',
   },
   {
     id: 'VR_ANIMATE_FABRIC_DETAIL',
@@ -122,5 +126,6 @@ export const ANIMATE_RECIPES: VideoRecipe[] = [
     aspectRatio: '16:9',
     resolution: '1080p',
     tier: 'generate',
+    motionSpeed: 'natural_real_time',
   },
 ]
