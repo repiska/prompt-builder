@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import {
-  VIDEO_RECIPES,
+  ALL_VIDEO_RECIPES,
   VIDEO_BASE_BLOCKS,
   MOTION_BLOCKS,
   CAMERA_MOVE_BLOCKS,
   GRADE_VIDEO_BLOCKS,
   AUDIO_PRESET_BLOCKS,
+  ANIMATE_BASE_BLOCKS,
+  ANIMATE_MOTION_BLOCKS,
 } from '../data/video'
 import { composeVideoPrompt, type ComposeVideoInput } from '../lib/composer'
 import type { Lang } from '../lib/i18n'
@@ -15,13 +17,16 @@ import { VideoProjectPanel } from './VideoProjectPanel'
 
 // ── resolver ──────────────────────────────────────────────────────────────────
 
+const ALL_BASE_BLOCKS = [...VIDEO_BASE_BLOCKS, ...ANIMATE_BASE_BLOCKS]
+const ALL_MOTION_BLOCKS = [...MOTION_BLOCKS, ...ANIMATE_MOTION_BLOCKS]
+
 function resolveRecipe(recipeId: string): ComposeVideoInput | null {
-  const recipe = VIDEO_RECIPES.find((r) => r.id === recipeId)
+  const recipe = ALL_VIDEO_RECIPES.find((r) => r.id === recipeId)
   if (!recipe) return null
-  const base = VIDEO_BASE_BLOCKS.find((b) => b.id === recipe.baseId)
+  const base = ALL_BASE_BLOCKS.find((b) => b.id === recipe.baseId)
   if (!base) return null
   const motion = recipe.motionId
-    ? (MOTION_BLOCKS.find((m) => m.id === recipe.motionId) ?? null)
+    ? (ALL_MOTION_BLOCKS.find((m) => m.id === recipe.motionId) ?? null)
     : null
   const cameraMove = recipe.cameraMoveId
     ? (CAMERA_MOVE_BLOCKS.find((c) => c.id === recipe.cameraMoveId) ?? null)
@@ -86,7 +91,12 @@ interface Props {
 export function VideoModePanel({ lang }: Props) {
   const { videoMode, setVideoMode } = useEditor()
   const [selectedRecipeId, setSelectedRecipeId] = useState<string>(
-    VIDEO_RECIPES[0]?.id ?? 'VR_PDP_LOOP'
+    ALL_VIDEO_RECIPES[0]?.id ?? 'VR_PDP_LOOP'
+  )
+
+  const hasAnimateRecipe = useMemo(
+    () => ALL_VIDEO_RECIPES.some((r) => r.baseId === 'VB_ANIMATE'),
+    [],
   )
 
   const output = useMemo(() => {
@@ -130,11 +140,16 @@ export function VideoModePanel({ lang }: Props) {
             <h2 className="text-sm font-semibold text-accent-400 uppercase tracking-wider">
               {t(lang, 'video.modeTitle')}
             </h2>
+            {hasAnimateRecipe && (
+              <p className="text-xs text-ink-400 mt-1">
+                {t(lang, 'video.animateTip')}
+              </p>
+            )}
           </div>
 
           {/* Recipe pills */}
           <div className="flex flex-wrap gap-2">
-            {VIDEO_RECIPES.map((recipe) => {
+            {ALL_VIDEO_RECIPES.map((recipe) => {
               const active = recipe.id === selectedRecipeId
               return (
                 <button

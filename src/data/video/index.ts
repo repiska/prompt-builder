@@ -10,6 +10,7 @@ import { UGC_CAMERA_MOVE_BLOCKS } from './ugc_camera_moves'
 import { UGC_AUDIO_PRESET_BLOCKS } from './ugc_audio_presets'
 import { VIDEO_RECIPES } from './recipes'
 import { UGC_RECIPES } from './ugc_recipes'
+import { ANIMATE_BASE_BLOCKS, ANIMATE_MOTION_BLOCKS, ANIMATE_RECIPES } from './animate'
 
 export { VIDEO_BASE_BLOCKS } from './base'
 export { MOTION_BLOCKS } from './motions'
@@ -22,6 +23,7 @@ export { UGC_MOTION_BLOCKS } from './ugc_motions'
 export { UGC_CAMERA_MOVE_BLOCKS } from './ugc_camera_moves'
 export { UGC_AUDIO_PRESET_BLOCKS } from './ugc_audio_presets'
 export { UGC_RECIPES } from './ugc_recipes'
+export { ANIMATE_BASE_BLOCKS, ANIMATE_MOTION_BLOCKS, ANIMATE_RECIPES } from './animate'
 
 export const ALL_VIDEO_BLOCKS: VideoBlock[] = [
   ...VIDEO_BASE_BLOCKS,
@@ -33,6 +35,8 @@ export const ALL_VIDEO_BLOCKS: VideoBlock[] = [
   ...UGC_MOTION_BLOCKS,
   ...UGC_CAMERA_MOVE_BLOCKS,
   ...UGC_AUDIO_PRESET_BLOCKS,
+  ...ANIMATE_BASE_BLOCKS,
+  ...ANIMATE_MOTION_BLOCKS,
 ]
 
-export const ALL_VIDEO_RECIPES = [...VIDEO_RECIPES, ...UGC_RECIPES]
+export const ALL_VIDEO_RECIPES = [...VIDEO_RECIPES, ...UGC_RECIPES, ...ANIMATE_RECIPES]

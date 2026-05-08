@@ -288,6 +288,12 @@ const DICT: Dict = {
   },
   'video.voiceoverHintSuggestedVoice': { en: 'Suggested voice', ru: 'Рекомендуемый голос' },
 
+  // Animate-from-photo tip
+  'video.animateTip': {
+    en: "Tip: 'Animate' recipes work on any product photo without per-SKU rewriting.",
+    ru: "Совет: рецепты «Анимация» работают на любом фото товара без переписывания под артикул.",
+  },
+
   // Project output
   'video.composedClipPrompts': { en: 'Composed clip prompts', ru: 'Готовые промпты клипов' },
   'video.continuityChecklist': { en: 'Continuity checklist', ru: 'Чеклист continuity' },

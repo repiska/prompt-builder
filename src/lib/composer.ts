@@ -432,6 +432,29 @@ export function composeVideoPrompt(input: ComposeVideoInput): ComposeVideoOutput
       const motionText = resolveBlockText(motion, slotValues)
       if (motionText) sentences.push(ensurePeriod(motionText))
     }
+  // TODO: promote to a base.mode field when more strip-modes appear
+  } else if (base.id === 'VB_ANIMATE') {
+    // Animate-from-photo stripped path — the reference image carries subject + context.
+    // Emit only: Cinematography → Action → Style/Ambiance (if grade provided) → Maintain-style sentinel.
+
+    // 1. Cinematography — camera angle + movement + shot type
+    const movementLabel = cameraMove ? resolveBlockText(cameraMove, slotValues) : 'Static shot'
+    sentences.push(ensurePeriod(movementLabel))
+
+    // 2. Action — motion block (no subject sentence, no context sentence)
+    if (motion) {
+      const motionText = resolveBlockText(motion, slotValues)
+      if (motionText) sentences.push(ensurePeriod(motionText))
+    }
+
+    // 3. Style & Ambiance — only if grade block provided; omit default fallback
+    if (grade) {
+      const gradeText = resolveBlockText(grade, slotValues)
+      if (gradeText) sentences.push(ensurePeriod(gradeText))
+    }
+
+    // Mandatory animate-mode sentinel — must appear before audio sentences
+    sentences.push('Maintain the style of the image.')
   } else {
     // Deterministic build path — 5-section ordering:
     // 1 Cinematography, 2 Subject, 3 Action, 4 Context, 5 Style & Ambiance
